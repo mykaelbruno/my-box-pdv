@@ -9,7 +9,7 @@ import {
   ChevronDown,
   CircleDollarSign,
   ClipboardList,
-  LayoutDashboard,
+  House,
   Menu,
   PackageSearch,
   ReceiptText,
@@ -25,16 +25,21 @@ import {
 import type { NavItem, Role, ViewId } from '../types'
 import { Badge } from './Ui'
 
-const marketNav: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'pdv', label: 'PDV', icon: ShoppingCart },
-  { id: 'vendas', label: 'Vendas', icon: ReceiptText },
-  { id: 'caixa', label: 'Caixa', icon: Banknote },
+const marketOperationNav: NavItem[] = [
+  { id: 'dashboard', label: 'Início', icon: House },
+  { id: 'pdv', label: 'Vender', icon: ShoppingCart },
+  { id: 'clientes', label: 'Caderno de Fiado', icon: UsersRound },
   { id: 'estoque', label: 'Estoque', icon: Boxes },
-  { id: 'clientes', label: 'Clientes / Fiado', icon: UsersRound },
-  { id: 'financeiro', label: 'Financeiro', icon: CircleDollarSign },
+]
+
+const marketFinanceNav: NavItem[] = [
+  { id: 'caixa', label: 'Caixa', icon: Banknote },
+  { id: 'vendas', label: 'Vendas', icon: ReceiptText },
   { id: 'firmas', label: 'Firmas', icon: Building2 },
   { id: 'relatorios', label: 'Relatórios', icon: BarChart3 },
+]
+
+const marketSystemNav: NavItem[] = [
   { id: 'backups', label: 'Backups', icon: Archive },
 ]
 
@@ -59,7 +64,7 @@ interface AppShellProps {
 export function AppShell({ children, role, activeView, onNavigate, onLogout, onRoleChange }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
-  const navigation = role === 'APP_ADMIN' ? adminNav : marketNav
+  const [financeOpen, setFinanceOpen] = useState(true)
 
   const navigate = (view: ViewId) => {
     onNavigate(view)
@@ -76,17 +81,71 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
         </div>
 
         <nav className="sidebar__nav" aria-label="Navegação principal">
-          <span className="nav-label">{role === 'APP_ADMIN' ? 'Administração' : 'Operação'}</span>
-          {navigation.map((item) => {
-            const Icon = item.icon
-            return (
-              <button key={item.id} className={`nav-item ${activeView === item.id ? 'nav-item--active' : ''}`} onClick={() => navigate(item.id)}>
-                <Icon size={19} />
-                <span>{item.label}</span>
-                {item.id === 'clientes' && role === 'MERCADO' && <span className="nav-count">4</span>}
-              </button>
-            )
-          })}
+          {role === 'APP_ADMIN' ? (
+            <>
+              <span className="nav-label">Administração</span>
+              {adminNav.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button key={item.id} className={`nav-item ${activeView === item.id ? 'nav-item--active' : ''}`} onClick={() => navigate(item.id)}>
+                    <Icon size={19} />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </>
+          ) : (
+            <>
+              <span className="nav-label">Operação</span>
+              {marketOperationNav.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button key={item.id} className={`nav-item ${activeView === item.id ? 'nav-item--active' : ''}`} onClick={() => navigate(item.id)}>
+                    <Icon size={19} />
+                    <span>{item.label}</span>
+                    {item.id === 'clientes' && <span className="nav-count">4</span>}
+                  </button>
+                )
+              })}
+
+              <div className="nav-group">
+                <button
+                  className={`nav-item nav-group__toggle ${activeView === 'financeiro' || marketFinanceNav.some((item) => item.id === activeView) ? 'nav-item--group-active' : ''}`}
+                  onClick={() => setFinanceOpen((open) => !open)}
+                  aria-expanded={financeOpen}
+                  aria-controls="finance-navigation"
+                >
+                  <CircleDollarSign size={19} />
+                  <span>Financeiro</span>
+                  <ChevronDown className="nav-group__chevron" size={17} />
+                </button>
+                {financeOpen && (
+                  <div className="nav-submenu" id="finance-navigation">
+                    {marketFinanceNav.map((item) => {
+                      const Icon = item.icon
+                      return (
+                        <button key={item.id} className={`nav-item ${activeView === item.id ? 'nav-item--active' : ''}`} onClick={() => navigate(item.id)}>
+                          <Icon size={18} />
+                          <span>{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <span className="nav-label nav-label--section">Sistema</span>
+              {marketSystemNav.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button key={item.id} className={`nav-item ${activeView === item.id ? 'nav-item--active' : ''}`} onClick={() => navigate(item.id)}>
+                    <Icon size={19} />
+                    <span>{item.label}</span>
+                  </button>
+                )
+              })}
+            </>
+          )}
         </nav>
 
         <div className="sidebar__foot">
@@ -141,15 +200,14 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
 
         {role === 'MERCADO' && (
           <nav className="mobile-nav" aria-label="Navegação móvel">
-            {marketNav.filter((item) => bottomIds.includes(item.id)).map((item) => {
+            {bottomIds.map((id) => marketOperationNav.find((item) => item.id === id)).filter((item): item is NavItem => Boolean(item)).map((item) => {
               const Icon = item.icon
-              return <button key={item.id} className={activeView === item.id ? 'active' : ''} onClick={() => navigate(item.id)}><Icon size={20} /><span>{item.label === 'Clientes / Fiado' ? 'Fiado' : item.label}</span></button>
+              return <button key={item.id} className={activeView === item.id ? 'active' : ''} onClick={() => navigate(item.id)}><Icon size={24} /><span>{item.id === 'clientes' ? 'Fiado' : item.label}</span></button>
             })}
-            <button onClick={() => setMenuOpen(true)}><Menu size={20} /><span>Mais</span></button>
+            <button onClick={() => setMenuOpen(true)}><Menu size={24} /><span>Mais</span></button>
           </nav>
         )}
       </div>
     </div>
   )
 }
-

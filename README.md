@@ -6,9 +6,11 @@ mockados.
 
 ## Prototipo frontend
 
-O prototipo cobre login, dashboard, PDV, vendas, caixa, estoque, financeiro,
+O prototipo cobre login, inicio operacional, PDV, vendas, caixa, estoque, financeiro,
 firmas, clientes/fiado, relatorios, backups, administracao global e conta do
-usuario. A interface possui layouts especificos para desktop, tablet e mobile.
+usuario. A interface e mobile-first e prioriza cards, botoes grandes, atalhos de
+balcao e leitura facilitada. Desktop e tablet preservam maior densidade para
+consultas e analises.
 
 Os dados e operacoes sao locais e reiniciam ao recarregar a pagina. Nao existe
 backend, autenticacao real, pagamento real ou persistencia nesta etapa.
@@ -42,4 +44,6 @@ npm run build
 - backlog: `docs/My Box PDV - Backlog.md`;
 - prompt de interface: `docs/prompt-figma-prototipo-my-box-pdv.md`;
 - planejamento do prototipo: `docs/planejamento/prototipo-frontend-v1.md`;
-- registro da entrega: `docs/alteracoes/prototipo-frontend-v1.md`.
+- planejamento mobile-first: `docs/planejamento/reformulacao-frontend-mobile-first.md`;
+- registro do prototipo: `docs/alteracoes/prototipo-frontend-v1.md`;
+- registro da reformulacao: `docs/alteracoes/reformulacao-frontend-mobile-first.md`.

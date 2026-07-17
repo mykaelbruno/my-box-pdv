@@ -1,0 +1,56 @@
+# Reformulacao do frontend mobile-first
+
+## Entrega
+
+O prototipo foi reorganizado para priorizar o uso diario no celular por
+operadores de mercado com pouca familiaridade com sistemas de gestao.
+
+## Alteracoes principais
+
+- tela inicial substituida por uma central de tarefas de balcao;
+- `Nova venda` transformada na acao visual principal;
+- atalhos grandes para fiado, estoque, consulta, despesa, vendas e caixa;
+- navegacao mobile renomeada e ampliada para `Inicio`, `Vender`, `Estoque`,
+  `Fiado` e `Mais`;
+- botoes, campos, rotulos, tabelas responsivas e alvos de toque ampliados;
+- PDV mobile com busca, carrinhos, itens e resumo de venda mais legiveis;
+- modais centralizados no desktop e apresentados como painel inferior no
+  mobile;
+- campo de ajuste de preco alterado para aceitar digitacao monetaria direta com
+  virgula ou ponto;
+- criacao de carrinho com identificacao opcional por cliente cadastrado ou
+  apelido livre;
+- nome do carrinho exibido em destaque, mantendo o codigo em tamanho secundario;
+- cliente cadastrado do carrinho reaproveitado automaticamente no pagamento
+  fiado;
+- pagamento fiado sem cliente vinculado exige selecao explicita;
+- cards de carrinho separados no mobile e carrinho ativo mantido visivel na
+  faixa horizontal;
+- indicadores analiticos movidos para uma area secundaria da tela inicial.
+
+## Arquivos principais
+
+- `frontend/src/pages/DashboardPage.tsx`;
+- `frontend/src/pages/PdvPage.tsx`;
+- `frontend/src/components/AppShell.tsx`;
+- `frontend/src/styles.css`;
+- `docs/planejamento/reformulacao-frontend-mobile-first.md`.
+
+## Validacoes executadas
+
+- `npm run typecheck`;
+- `npm run build`;
+- inspecao visual mobile em 390 x 844;
+- verificacao de ausencia de overflow horizontal;
+- navegacao da tela inicial para o PDV;
+- abertura e alinhamento do modal de ajuste no mobile;
+- digitacao dos valores `10,50` e `10.50` no ajuste de preco;
+- verificacao das dimensoes do layout em desktop.
+
+## Limitacoes
+
+- os dados e comportamentos continuam mockados e sem persistencia;
+- nao existe integracao com backend nesta etapa;
+- a captura de imagem em desktop do navegador de validacao apresentou artefato
+  de repeticao apos o redimensionamento, embora as dimensoes do DOM tenham sido
+  verificadas sem overflow.

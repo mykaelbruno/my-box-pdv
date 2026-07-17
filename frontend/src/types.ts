@@ -59,6 +59,8 @@ export interface Cart {
   codigo: string
   horario: string
   operador: string
+  clienteId?: number
+  apelido?: string
   items: CartItem[]
 }
 
@@ -93,4 +95,3 @@ export interface Firm {
   utilizado: number
   ativo: boolean
 }
-

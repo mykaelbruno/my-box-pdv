@@ -1,73 +1,118 @@
-import { AlertCircle, ArrowRight, Banknote, Boxes, CircleDollarSign, Clock3, PackagePlus, ReceiptText, ShoppingCart, TrendingUp, UserRoundCheck, WalletCards } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowRight,
+  Banknote,
+  Boxes,
+  CircleDollarSign,
+  Clock3,
+  PackagePlus,
+  ReceiptText,
+  Search,
+  ShoppingCart,
+  WalletCards,
+} from 'lucide-react'
 import type { ViewId } from '../types'
-import { money, recentSales } from '../data/mockData'
-import { Badge, Button, Metric, PageHeader, Section } from '../components/Ui'
 
 export function DashboardPage({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
   return (
-    <div className="page dashboard-page">
-      <PageHeader
-        eyebrow="Sexta-feira, 17 de julho"
-        title="Bom dia, Coutinho"
-        description="O caixa está aberto e o movimento segue acima de ontem."
-        actions={<Button variant="primary" icon={<ShoppingCart size={18} />} onClick={() => onNavigate('pdv')}>Abrir PDV</Button>}
-      />
-
-      <section className="dashboard-pulse">
-        <div className="pulse-main">
-          <div className="pulse-main__head"><span>Recebido hoje</span><Badge tone="success"><TrendingUp size={13} /> 12,4%</Badge></div>
-          <strong>R$ 2.847,60</strong>
-          <div className="pulse-main__meta"><span><b>42</b> vendas</span><span><b>R$ 67,80</b> ticket médio</span><span><b>8h24</b> de caixa</span></div>
-          <div className="sales-bars" aria-label="Vendas por hora">
-            {[22, 34, 28, 58, 48, 78, 65, 92, 74, 84, 56, 68].map((height, index) => <span key={index} style={{ height: `${height}%` }} className={index === 7 ? 'peak' : ''} />)}
-          </div>
-          <div className="sales-bars__labels"><span>08h</span><span>10h</span><span>12h</span><span>14h</span><span>16h</span><span>18h</span></div>
+    <div className="page home-page">
+      <header className="home-header">
+        <div>
+          <span className="home-header__date">Sexta-feira, 17 de julho</span>
+          <h1>Bom dia, Coutinho</h1>
+          <p>Escolha uma tarefa para começar.</p>
         </div>
-        <div className="pulse-side">
-          <Metric label="Em fiado" value="R$ 248,30" detail="3 vendas hoje" tone="warning" icon={<UserRoundCheck size={18} />} />
-          <Metric label="Contas abertas" value="R$ 3.420,00" detail="1 vencida" tone="danger" icon={<ReceiptText size={18} />} />
-          <Metric label="Estoque baixo" value="2 produtos" detail="1 item zerado" tone="warning" icon={<Boxes size={18} />} />
-          <Metric label="Caixa" value="Aberto" detail="Desde 07:42" tone="success" icon={<Clock3 size={18} />} />
+        <button className="home-cash-status" onClick={() => onNavigate('caixa')}>
+          <span className="home-cash-status__dot" />
+          <span><small>CAIXA ABERTO</small><strong>Desde 07:42</strong></span>
+          <ArrowRight size={20} />
+        </button>
+      </header>
+
+      <section className="counter-grid" aria-label="Atalhos principais">
+        <button className="counter-primary" onClick={() => onNavigate('pdv')}>
+          <span className="counter-primary__icon"><ShoppingCart size={40} strokeWidth={1.8} /></span>
+          <span className="counter-primary__copy">
+            <small>AÇÃO PRINCIPAL</small>
+            <strong>Nova venda</strong>
+            <span>Abrir o balcão e adicionar produtos</span>
+          </span>
+          <span className="counter-primary__footer">
+            <span><b>2</b> carrinhos em andamento</span>
+            <ArrowRight size={24} />
+          </span>
+        </button>
+
+        <div className="counter-shortcuts">
+          <button className="counter-shortcut counter-shortcut--info" onClick={() => onNavigate('clientes')}>
+            <span><WalletCards size={28} /></span>
+            <strong>Receber fiado</strong>
+            <small>4 clientes em aberto</small>
+          </button>
+          <button className="counter-shortcut counter-shortcut--warning" onClick={() => onNavigate('estoque')}>
+            <span><PackagePlus size={28} /></span>
+            <strong>Entrada de estoque</strong>
+            <small>Registrar mercadoria</small>
+          </button>
+          <button className="counter-shortcut" onClick={() => onNavigate('estoque')}>
+            <span><Search size={28} /></span>
+            <strong>Consultar produto</strong>
+            <small>Preço e quantidade</small>
+          </button>
+          <button className="counter-shortcut counter-shortcut--danger" onClick={() => onNavigate('financeiro')}>
+            <span><CircleDollarSign size={28} /></span>
+            <strong>Registrar despesa</strong>
+            <small>Saída do caixa</small>
+          </button>
+          <button className="counter-shortcut" onClick={() => onNavigate('vendas')}>
+            <span><ReceiptText size={28} /></span>
+            <strong>Vendas do dia</strong>
+            <small>Consultar e cancelar</small>
+          </button>
+          <button className="counter-shortcut counter-shortcut--success" onClick={() => onNavigate('caixa')}>
+            <span><Banknote size={28} /></span>
+            <strong>Movimento do caixa</strong>
+            <small>Entradas e sangrias</small>
+          </button>
         </div>
       </section>
 
-      <div className="quick-actions" aria-label="Ações rápidas">
-        <button onClick={() => onNavigate('pdv')}><span><ShoppingCart size={20} /></span><div><strong>Nova venda</strong><small>Iniciar no balcão</small></div><ArrowRight size={17} /></button>
-        <button onClick={() => onNavigate('estoque')}><span><PackagePlus size={20} /></span><div><strong>Entrada de estoque</strong><small>Registrar mercadoria</small></div><ArrowRight size={17} /></button>
-        <button onClick={() => onNavigate('financeiro')}><span><CircleDollarSign size={20} /></span><div><strong>Registrar despesa</strong><small>Nova conta financeira</small></div><ArrowRight size={17} /></button>
-        <button onClick={() => onNavigate('clientes')}><span><Banknote size={20} /></span><div><strong>Receber fiado</strong><small>Baixar pagamento</small></div><ArrowRight size={17} /></button>
-      </div>
+      <section className="home-section">
+        <header className="home-section__header">
+          <div><span>PRECISA DE ATENÇÃO</span><h2>Pendências de hoje</h2></div>
+          <strong>3</strong>
+        </header>
+        <div className="attention-grid">
+          <button onClick={() => onNavigate('estoque')}>
+            <span className="attention-grid__icon attention-grid__icon--danger"><Boxes size={24} /></span>
+            <span><strong>Café Torrado zerou</strong><small>O estoque mínimo é 12 unidades</small></span>
+            <ArrowRight size={21} />
+          </button>
+          <button onClick={() => onNavigate('financeiro')}>
+            <span className="attention-grid__icon attention-grid__icon--warning"><AlertTriangle size={24} /></span>
+            <span><strong>Conta de energia vencida</strong><small>R$ 486,72, vencida há 2 dias</small></span>
+            <ArrowRight size={21} />
+          </button>
+          <button onClick={() => onNavigate('clientes')}>
+            <span className="attention-grid__icon attention-grid__icon--info"><WalletCards size={24} /></span>
+            <span><strong>Dona Maria está em aberto</strong><small>R$ 186,40 em 3 compras</small></span>
+            <ArrowRight size={21} />
+          </button>
+        </div>
+      </section>
 
-      <div className="dashboard-grid">
-        <Section title="Últimas vendas" action={<Button variant="quiet" onClick={() => onNavigate('vendas')}>Ver todas <ArrowRight size={16} /></Button>}>
-          <div className="data-list sales-list">
-            <div className="data-list__head"><span>Venda</span><span>Pagamento</span><span>Itens</span><span>Total</span><span>Status</span></div>
-            {recentSales.slice(0, 4).map((sale) => (
-              <button className="data-row" key={sale.id} onClick={() => onNavigate('vendas')}>
-                <span><strong>{sale.id}</strong><small>{sale.time} · {sale.customer}</small></span>
-                <span>{sale.payment}</span><span>{sale.items}</span><strong>{money(sale.total)}</strong>
-                <Badge tone={sale.status === 'Finalizada' ? 'success' : 'danger'}>{sale.status}</Badge>
-              </button>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Atenção agora" action={<span className="section-count">4 alertas</span>}>
-          <div className="alert-list">
-            <button onClick={() => onNavigate('estoque')}><span className="alert-icon alert-icon--danger"><AlertCircle size={18} /></span><div><strong>Café Torrado zerou</strong><small>Estoque mínimo: 12 un.</small></div><ArrowRight size={16} /></button>
-            <button onClick={() => onNavigate('financeiro')}><span className="alert-icon alert-icon--warning"><ReceiptText size={18} /></span><div><strong>Conta de energia vencida</strong><small>R$ 486,72 · há 2 dias</small></div><ArrowRight size={16} /></button>
-            <button onClick={() => onNavigate('clientes')}><span className="alert-icon alert-icon--info"><WalletCards size={18} /></span><div><strong>Dona Maria em aberto</strong><small>R$ 186,40 em 3 dívidas</small></div><ArrowRight size={16} /></button>
-            <button onClick={() => onNavigate('backups')}><span className="alert-icon alert-icon--success"><Boxes size={18} /></span><div><strong>Backup concluído</strong><small>Hoje, às 03:00</small></div><ArrowRight size={16} /></button>
-          </div>
-        </Section>
-      </div>
-
-      <section className="payment-composition">
-        <div><span>Formas de pagamento hoje</span><strong>R$ 3.095,90 movimentados</strong></div>
-        <div className="payment-stack"><span style={{ width: '34%' }} className="money" /><span style={{ width: '29%' }} className="pix" /><span style={{ width: '29%' }} className="card" /><span style={{ width: '8%' }} className="credit" /></div>
-        <div className="payment-legend"><span><i className="money" />Dinheiro <b>34%</b></span><span><i className="pix" />Pix <b>29%</b></span><span><i className="card" />Cartão <b>29%</b></span><span><i className="credit" />Fiado <b>8%</b></span></div>
+      <section className="home-section home-section--summary">
+        <header className="home-section__header">
+          <div><span>RESUMO SIMPLES</span><h2>Como está o dia</h2></div>
+          <button onClick={() => onNavigate('relatorios')}>Ver detalhes <ArrowRight size={18} /></button>
+        </header>
+        <div className="day-summary">
+          <div><span><ReceiptText size={20} /> Vendas</span><strong>42</strong><small>12 a mais que ontem</small></div>
+          <div><span><Banknote size={20} /> Recebido</span><strong>R$ 2.847,60</strong><small>Dinheiro, Pix e cartão</small></div>
+          <div><span><WalletCards size={20} /> Fiado</span><strong>R$ 248,30</strong><small>3 vendas hoje</small></div>
+          <div><span><Clock3 size={20} /> Caixa</span><strong>8h24</strong><small>Aberto desde 07:42</small></div>
+        </div>
       </section>
     </div>
   )
 }
-
