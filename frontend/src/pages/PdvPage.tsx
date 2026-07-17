@@ -298,7 +298,7 @@ export function PdvPage() {
         <aside className="sale-summary">
           <div className="sale-summary__head"><span>Resumo da venda</span><small>{activeCart.items.length} {activeCart.items.length === 1 ? 'item' : 'itens'}</small></div>
           <div className="summary-lines"><span><small>Subtotal</small><b>{money(activeCart.items.reduce((sum, item) => sum + item.preco * item.quantidade, 0))}</b></span><span><small>Ajustes</small><b className={activeCart.items.reduce((sum, item) => sum + item.ajuste, 0) <= 0 ? 'text-success' : 'text-warning'}>{money(activeCart.items.reduce((sum, item) => sum + item.ajuste, 0))}</b></span></div>
-          <div className="summary-total"><span>Total a pagar</span><strong>{money(total)}</strong><small>Estoque baixa somente após a finalização</small></div>
+          <div className="summary-total"><span>Total a pagar</span><strong>{money(total)}</strong><small>Estoque atualiza ao finalizar</small></div>
           <div className="summary-payment-preview"><span>Pagamento</span><div><Banknote size={18} /><span><strong>A definir</strong><small>Dinheiro, Pix, cartão ou fiado</small></span><ChevronDown size={16} /></div></div>
           <div className="summary-actions">
             <Button variant="quiet" icon={<Trash2 size={17} />} onClick={() => setModal('cancel')} disabled={!activeCart.items.length}>Cancelar</Button>

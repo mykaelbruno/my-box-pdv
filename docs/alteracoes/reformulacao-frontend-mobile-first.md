@@ -26,6 +26,13 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - pagamento fiado sem cliente vinculado exige selecao explicita;
 - cards de carrinho separados no mobile e carrinho ativo mantido visivel na
   faixa horizontal;
+- login mobile reorganizado em coluna unica e validado em 320 e 390 px;
+- topbar removida das telas operacionais no mobile e mantida na Home;
+- acao de sair adicionada ao rodape do menu lateral;
+- PDV mobile limitado ao viewport, com scroll vertical somente em produtos e
+  itens;
+- resumo mobile ampliado com subtotal, ajustes, total e atualizacao de estoque;
+- preco unitario e ajuste por item restaurados na visualizacao mobile;
 - indicadores analiticos movidos para uma area secundaria da tela inicial.
 
 ## Arquivos principais

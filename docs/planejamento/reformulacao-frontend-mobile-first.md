@@ -50,6 +50,11 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 7. Identificacao opcional de carrinhos por cliente cadastrado ou apelido livre.
 8. Preenchimento automatico do cliente no fiado quando o carrinho estiver
    vinculado a um cadastro.
+9. Login mobile em coluna unica, sem largura minima ou conteudo promocional
+   impedindo o acesso ao formulario.
+10. Topbar mobile restrita a tela inicial, mantendo navegacao e saida no menu.
+11. PDV mobile com viewport fixo e rolagem isolada na lista de produtos ou itens.
+12. Resumo mobile com subtotal, ajustes, total e regra de atualizacao do estoque.
 
 Nao fazem parte desta etapa mudancas de regra de negocio, integracao com backend
 ou implementacao de novos modulos funcionais.
@@ -82,5 +87,8 @@ ou implementacao de novos modulos funcionais.
 - carrinhos sem identificacao exibem somente o codigo;
 - carrinhos identificados exibem o nome em destaque e o codigo como metadado;
 - o fiado exige um cliente e reutiliza o cadastro vinculado ao carrinho;
+- o login permanece utilizavel a partir de 320 px sem rolagem horizontal;
+- a tela do PDV nao move cabecalho, carrinhos ou resumo ao percorrer itens;
+- subtotal, ajustes e descontos permanecem visiveis no mobile;
 - a identidade visual atual permanece reconhecivel;
 - build e verificacao de tipos concluem sem erros.

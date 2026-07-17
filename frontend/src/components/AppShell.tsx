@@ -10,6 +10,7 @@ import {
   CircleDollarSign,
   ClipboardList,
   House,
+  LogOut,
   Menu,
   PackageSearch,
   ReceiptText,
@@ -159,13 +160,16 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
           <button className={`nav-item ${activeView === 'conta' ? 'nav-item--active' : ''}`} onClick={() => navigate('conta')}>
             <Settings size={19} /><span>Minha conta</span>
           </button>
+          <button className="nav-item sidebar__logout" onClick={onLogout}>
+            <LogOut size={19} /><span>Sair</span>
+          </button>
         </div>
       </aside>
 
       {menuOpen && <button className="sidebar-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" />}
 
-      <div className="workspace">
-        <header className="topbar">
+      <div className={`workspace ${activeView === 'pdv' ? 'workspace--pdv' : ''}`}>
+        <header className={`topbar ${role === 'MERCADO' && activeView !== 'dashboard' ? 'topbar--mobile-hidden' : ''}`}>
           <button className="icon-button menu-trigger" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={21} /></button>
           <div className="topbar__market">
             <span className="market-avatar">MC</span>
