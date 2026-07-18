@@ -55,6 +55,10 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 10. Topbar mobile restrita a tela inicial, mantendo navegacao e saida no menu.
 11. PDV mobile com viewport fixo e rolagem isolada na lista de produtos ou itens.
 12. Resumo mobile com subtotal, ajustes, total e regra de atualizacao do estoque.
+13. `Vender` como acao central e destacada na navegacao inferior mobile.
+14. Abertura do PDV sem foco automatico no campo de busca ou teclado virtual.
+15. Estoque com atalhos funcionais em carrossel e produtos em linhas compactas.
+16. Fiado com dois atalhos iniciais e indicadores reunidos em modal de resumo.
 
 Nao fazem parte desta etapa mudancas de regra de negocio, integracao com backend
 ou implementacao de novos modulos funcionais.
@@ -90,5 +94,11 @@ ou implementacao de novos modulos funcionais.
 - o login permanece utilizavel a partir de 320 px sem rolagem horizontal;
 - a tela do PDV nao move cabecalho, carrinhos ou resumo ao percorrer itens;
 - subtotal, ajustes e descontos permanecem visiveis no mobile;
+- `Vender` ocupa o centro da barra inferior e possui destaque de acao primaria;
+- o PDV abre sem selecionar automaticamente o campo de busca;
+- produtos do estoque usam linhas de 92 px sem overflow horizontal a partir de
+  320 px;
+- os atalhos de estoque permitem cadastrar, consultar por codigo e movimentar;
+- o resumo do fiado abre sob demanda e nao ocupa espaco permanente na tela;
 - a identidade visual atual permanece reconhecivel;
 - build e verificacao de tipos concluem sem erros.

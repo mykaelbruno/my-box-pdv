@@ -51,7 +51,7 @@ const adminNav: NavItem[] = [
   { id: 'conta', label: 'Configurações', icon: Settings },
 ]
 
-const bottomIds: ViewId[] = ['dashboard', 'pdv', 'estoque', 'clientes']
+const bottomIds: ViewId[] = ['dashboard', 'estoque', 'pdv', 'clientes']
 
 interface AppShellProps {
   children: ReactNode
@@ -206,7 +206,7 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
           <nav className="mobile-nav" aria-label="Navegação móvel">
             {bottomIds.map((id) => marketOperationNav.find((item) => item.id === id)).filter((item): item is NavItem => Boolean(item)).map((item) => {
               const Icon = item.icon
-              return <button key={item.id} className={activeView === item.id ? 'active' : ''} onClick={() => navigate(item.id)}><Icon size={24} /><span>{item.id === 'clientes' ? 'Fiado' : item.label}</span></button>
+              return <button key={item.id} className={`${activeView === item.id ? 'active ' : ''}${item.id === 'pdv' ? 'mobile-nav__primary' : ''}`} onClick={() => navigate(item.id)}><Icon size={item.id === 'pdv' ? 27 : 24} /><span>{item.id === 'clientes' ? 'Fiado' : item.label}</span></button>
             })}
             <button onClick={() => setMenuOpen(true)}><Menu size={24} /><span>Mais</span></button>
           </nav>

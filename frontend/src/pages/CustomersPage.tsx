@@ -1,18 +1,22 @@
 import { useMemo, useState } from 'react'
-import { Banknote, CalendarDays, Check, ChevronRight, CircleDollarSign, Clock3, Filter, History, Phone, Plus, ReceiptText, Search, UserPlus, UsersRound, WalletCards } from 'lucide-react'
+import { Banknote, CalendarDays, Check, ChevronRight, CircleDollarSign, Filter, History, ReceiptText, Search, UserPlus, UsersRound, WalletCards } from 'lucide-react'
 import { customers, money } from '../data/mockData'
 import type { Customer } from '../types'
-import { Badge, Button, Field, Metric, Modal, PageHeader, Progress, Section, Toast, type ToastTone } from '../components/Ui'
+import { Badge, Button, Field, Modal, PageHeader, Progress, Section, Toast, type ToastTone } from '../components/Ui'
 
 export function CustomersPage() {
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Customer | null>(null)
-  const [modal, setModal] = useState<'customer' | 'payment' | 'debt' | null>(null)
+  const [modal, setModal] = useState<'customer' | 'payment' | 'debt' | 'info' | null>(null)
   const [payment, setPayment] = useState(50)
   const [toast, setToast] = useState<{ text: string; tone: ToastTone } | null>(null)
 
   const visible = useMemo(() => customers.filter((customer) => `${customer.nome} ${customer.apelido ?? ''} ${customer.telefone ?? ''}`.toLowerCase().includes(query.toLowerCase())), [query])
   const totalOpen = customers.reduce((sum, customer) => sum + customer.totalAberto, 0)
+  const totalReceived = customers.reduce((sum, customer) => sum + customer.totalPago, 0)
+  const totalSoldOnCredit = totalOpen + totalReceived
+  const activeCustomers = customers.filter((customer) => customer.ativo).length
+  const openDebts = customers.reduce((sum, customer) => sum + customer.dividas, 0)
   const paymentError = selected && (payment <= 0 ? 'O valor deve ser maior que zero.' : payment > selected.totalAberto ? `O pagamento não pode superar ${money(selected.totalAberto)}.` : '')
 
   const savePayment = () => {
@@ -23,12 +27,17 @@ export function CustomersPage() {
 
   return (
     <div className="page">
-      <PageHeader eyebrow="Caderno digital" title="Clientes e fiado" description="Dívidas ligadas às vendas originais, com pagamentos e histórico." actions={<Button variant="primary" icon={<UserPlus size={18} />} onClick={() => setModal('customer')}>Novo cliente</Button>} />
-      <div className="fiado-hero"><div><span>Total em aberto</span><strong>{money(totalOpen)}</strong><small>5 dívidas de 3 clientes</small></div><div><Metric label="Recebido no mês" value="R$ 1.284,50" detail="18 pagamentos" tone="success" icon={<Banknote size={18} />} /><Metric label="Parcialmente pagas" value="2 dívidas" detail="R$ 148,40 pendentes" tone="warning" icon={<WalletCards size={18} />} /><Metric label="Clientes ativos" value="3" detail="1 cadastro inativo" icon={<UsersRound size={18} />} /></div></div>
+      <PageHeader eyebrow="Caderno digital" title="Clientes e fiado" description="Dívidas ligadas às vendas originais, com pagamentos e histórico." />
+      <div className="fiado-actions" aria-label="Ações do caderno de fiado">
+        <button className="fiado-action fiado-action--primary" onClick={() => setModal('customer')}><span><UserPlus size={24} /></span><strong>Novo cliente</strong><small>Cadastrar no caderno</small></button>
+        <button className="fiado-action" onClick={() => setModal('info')}><span><CircleDollarSign size={24} /></span><strong>Informações</strong><small>Ver resumo do fiado</small></button>
+      </div>
       <div className="filterbar"><label className="filter-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nome, apelido ou telefone" /></label><button><Filter size={17} /> Com dívida</button><button><CalendarDays size={17} /> Período</button></div>
       <div className="customer-grid">{visible.map((customer) => <button className={`customer-card ${!customer.ativo ? 'customer-card--inactive' : ''}`} key={customer.id} onClick={() => setSelected(customer)}><div className="customer-card__head"><span className="customer-avatar">{(customer.apelido ?? customer.nome).split(' ').slice(0, 2).map((word) => word[0]).join('')}</span><span><strong>{customer.apelido ?? customer.nome}</strong><small>{customer.apelido ? customer.nome : customer.telefone ?? 'Sem telefone'}</small></span><Badge tone={customer.ativo ? customer.totalAberto > 0 ? 'warning' : 'success' : 'neutral'}>{customer.ativo ? customer.totalAberto > 0 ? 'Em aberto' : 'Em dia' : 'Inativo'}</Badge></div><div className="customer-card__balance"><span><small>Em aberto</small><strong>{money(customer.totalAberto)}</strong></span><span><small>Dívidas</small><b>{customer.dividas}</b></span></div><div className="customer-card__foot"><span><History size={14} /> Último pagamento {customer.ultimoPagamento}</span><ChevronRight size={17} /></div></button>)}</div>
 
       {selected && !modal && <div className="drawer-layer" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setSelected(null)}><aside className="detail-drawer customer-drawer"><div className="detail-drawer__header"><button onClick={() => setSelected(null)} aria-label="Fechar">×</button><span className="customer-avatar customer-avatar--large">{(selected.apelido ?? selected.nome).split(' ').slice(0, 2).map((word) => word[0]).join('')}</span><div><Badge tone={selected.ativo ? 'success' : 'neutral'}>{selected.ativo ? 'Cliente ativo' : 'Cliente inativo'}</Badge><h2>{selected.apelido ?? selected.nome}</h2><p>{selected.nome}{selected.telefone && ` · ${selected.telefone}`}</p></div></div><div className="customer-balance"><span><small>Em aberto</small><strong>{money(selected.totalAberto)}</strong></span><span><small>Total já pago</small><b>{money(selected.totalPago)}</b></span><Button variant="primary" icon={<Banknote size={17} />} disabled={!selected.ativo || selected.totalAberto <= 0} onClick={() => { setPayment(Math.min(50, selected.totalAberto)); setModal('payment') }}>Registrar pagamento</Button></div>{!selected.ativo && <div className="inactive-notice">O histórico foi preservado, mas este cliente não pode ser usado em novas vendas fiadas.</div>}<Section title="Dívidas"><div className="debt-list">{selected.totalAberto > 0 ? <><button onClick={() => setModal('debt')}><span className="due-date due-date--warning"><b>08</b><small>JUL</small></span><span><strong>Venda #1012</strong><small>3 itens · parcialmente paga</small></span><span><small>Pendente</small><b>{money(selected.totalAberto * .62)}</b></span><ChevronRight size={17} /></button><button onClick={() => setModal('debt')}><span className="due-date due-date--info"><b>28</b><small>JUN</small></span><span><strong>Venda #0978</strong><small>6 itens · pendente</small></span><span><small>Pendente</small><b>{money(selected.totalAberto * .38)}</b></span><ChevronRight size={17} /></button></> : <div className="inline-empty"><Check size={19} /><span><strong>Nenhuma dívida pendente</strong><small>Este cliente está em dia.</small></span></div>}</div></Section><Section title="Pagamentos recentes"><div className="timeline"><div><i className="success" /><span><strong>Pagamento em dinheiro</strong><small>{selected.ultimoPagamento} · Coutinho</small></span><b>+ {money(50)}</b></div><div><i className="info" /><span><strong>Pagamento via Pix</strong><small>02 jul, 10:18 · Coutinho</small></span><b>+ {money(36.4)}</b></div></div></Section></aside></div>}
+
+      {modal === 'info' && <Modal title="Informações do fiado" description="Resumo atual do caderno de clientes." size="small" onClose={() => setModal(null)} footer={<Button variant="primary" onClick={() => setModal(null)}>Fechar</Button>}><div className="fiado-info-list"><div><UsersRound size={19} /><span><small>Clientes cadastrados</small><strong>{customers.length}</strong></span></div><div><UserPlus size={19} /><span><small>Clientes ativos</small><strong>{activeCustomers}</strong></span></div><div><WalletCards size={19} /><span><small>Vendas registradas no fiado</small><strong>{money(totalSoldOnCredit)}</strong></span></div><div><ReceiptText size={19} /><span><small>Dívidas em aberto</small><strong>{openDebts}</strong></span></div><div><CircleDollarSign size={19} /><span><small>Valor total em aberto</small><strong>{money(totalOpen)}</strong></span></div><div><Banknote size={19} /><span><small>Total já recebido</small><strong>{money(totalReceived)}</strong></span></div></div></Modal>}
 
       {modal === 'customer' && <Modal title="Novo cliente" description="Somente o nome é obrigatório para começar." onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Cancelar</Button><Button variant="primary" onClick={() => { setModal(null); setToast({ text: 'Cliente cadastrado e disponível para vendas fiadas', tone: 'success' }) }}>Cadastrar cliente</Button></>}><div className="form-grid"><Field label="Nome"><input placeholder="Nome completo" /></Field><Field label="Apelido (opcional)"><input placeholder="Como é conhecido" /></Field><Field label="Telefone (opcional)"><input placeholder="(00) 00000-0000" /></Field><Field label="Endereço (opcional)"><input placeholder="Rua, número e bairro" /></Field></div><Field label="Observação"><textarea placeholder="Referência ou combinação de pagamento" /></Field></Modal>}
 
@@ -39,4 +48,3 @@ export function CustomersPage() {
     </div>
   )
 }
-

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { AlertTriangle, Barcode, ChevronRight, CircleDollarSign, Filter, History, PackageCheck, PackagePlus, Plus, Search, SlidersHorizontal, Warehouse } from 'lucide-react'
+import { AlertTriangle, Barcode, ChevronRight, Filter, History, PackagePlus, Plus, Search, SlidersHorizontal } from 'lucide-react'
 import { money, products } from '../data/mockData'
 import type { Product } from '../types'
-import { Badge, Button, Field, Metric, Modal, PageHeader, Progress, Section, Toast } from '../components/Ui'
+import { Badge, Button, Field, Modal, PageHeader, Progress, Section, Toast } from '../components/Ui'
 
 export function InventoryPage() {
   const [query, setQuery] = useState('')
@@ -29,10 +29,20 @@ export function InventoryPage() {
     setToast(`${movementType} registrada: ${movementQuantity * movementFactor} ${movementProduct.unidade} em estoque base`)
   }
 
+  const consultByBarcode = () => {
+    setQuery(products[3].presentations[0].codigo)
+    setOnlyLow(false)
+    setToast('Produto localizado pelo código de barras')
+  }
+
   return (
     <div className="page">
-      <PageHeader eyebrow="Produtos e movimentações" title="Estoque" description="Tudo é controlado na unidade base de cada produto." actions={<><Button icon={<PackagePlus size={18} />} onClick={() => openMovement()}>Movimentar estoque</Button><Button variant="primary" icon={<Plus size={18} />} onClick={() => setModal('product')}>Novo produto</Button></>} />
-      <div className="metrics-grid"><Metric label="Produtos ativos" value="128" detail="5 categorias" icon={<Warehouse size={18} />} /><Metric label="Estoque baixo" value="2" detail="Precisam de reposição" tone="warning" icon={<AlertTriangle size={18} />} /><Metric label="Sem estoque" value="1" detail="Café Torrado" tone="danger" icon={<PackageCheck size={18} />} /><Metric label="Margem média" value="27,8%" detail="+1,2% no mês" tone="success" icon={<CircleDollarSign size={18} />} /></div>
+      <PageHeader eyebrow="Produtos e movimentações" title="Estoque" description="Tudo é controlado na unidade base de cada produto." />
+      <div className="inventory-actions" aria-label="Ações de estoque">
+        <button className="inventory-action inventory-action--primary" onClick={() => setModal('product')}><span><Plus size={22} /></span><span><strong>Novo produto</strong><small>Cadastrar no estoque</small></span><ChevronRight size={18} /></button>
+        <button className="inventory-action" onClick={consultByBarcode}><span><Barcode size={22} /></span><span><strong>Consultar produto</strong><small>Via código de barras</small></span><ChevronRight size={18} /></button>
+        <button className="inventory-action" onClick={() => openMovement()}><span><PackagePlus size={22} /></span><span><strong>Movimentar estoque</strong><small>Entrada, saída ou ajuste</small></span><ChevronRight size={18} /></button>
+      </div>
       <div className="filterbar"><label className="filter-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nome ou código de barras" /></label><button onClick={() => setOnlyLow(!onlyLow)} className={onlyLow ? 'active' : ''}><AlertTriangle size={17} /> Estoque baixo</button><button><Filter size={17} /> Categoria</button><button><SlidersHorizontal size={17} /> Filtros</button></div>
       <div className="table-shell">
         <div className="table-title"><div><strong>Catálogo de produtos</strong><small>{visible.length} de 128 produtos</small></div><span className="stock-legend"><i /> Estoque disponível em unidade base</span></div>
@@ -42,7 +52,7 @@ export function InventoryPage() {
             const percent = Math.min(100, (product.estoque / Math.max(product.minimo * 3, 1)) * 100)
             const status = product.estoque === 0 ? 'Zerado' : product.estoque <= product.minimo ? 'Estoque baixo' : 'Normal'
             const tone = product.estoque === 0 ? 'danger' : product.estoque <= product.minimo ? 'warning' : 'success'
-            return <button key={product.id} className="responsive-table__row" onClick={() => setSelected(product)}><span data-label="Produto" className="product-cell"><span className="product-symbol">{product.nome.slice(0, 2).toUpperCase()}</span><span><strong>{product.nome}</strong><small>{product.categoria} · {product.presentations.length} apresentações</small></span></span><strong data-label="Unidade">{product.unidade}</strong><span data-label="Estoque"><strong>{product.estoque} {product.unidade}</strong><small>Mínimo {product.minimo}</small></span><span data-label="Disponibilidade"><Progress value={percent} tone={tone} /></span><strong data-label="Preço">{money(product.presentations[0].preco)}</strong><span data-label="Status"><Badge tone={tone}>{status}</Badge></span><ChevronRight size={17} /></button>
+            return <button key={product.id} className="responsive-table__row" onClick={() => setSelected(product)}><span data-label="Produto" className="product-cell"><span className="product-symbol">{product.nome.slice(0, 2).toUpperCase()}</span><span><strong>{product.nome}</strong><small>{product.categoria} · {product.presentations.length} apresentações</small></span></span><strong className="inventory-unit" data-label="Unidade">{product.unidade}</strong><span className="inventory-stock" data-label="Estoque"><strong>{product.estoque} {product.unidade}</strong><small>Mínimo {product.minimo}</small></span><span className="inventory-progress" data-label="Disponibilidade"><Progress value={percent} tone={tone} /></span><strong className="inventory-price" data-label="Preço">{money(product.presentations[0].preco)}</strong><span className="inventory-status" data-label="Status"><Badge tone={tone}>{status}</Badge></span><ChevronRight size={17} /></button>
           })}
         </div>
       </div>
@@ -56,4 +66,3 @@ export function InventoryPage() {
     </div>
   )
 }
-

@@ -252,7 +252,7 @@ export function PdvPage() {
         <section className="product-workspace">
           <div className="product-search">
             <Search size={21} />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produto ou ler código de barras" autoFocus />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produto ou ler código de barras" />
             <button aria-label="Ler código de barras" onClick={() => setQuery('789100004001')}><Barcode size={22} /></button>
           </div>
 
