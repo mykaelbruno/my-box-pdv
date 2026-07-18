@@ -22,11 +22,18 @@ import {
 import { initialCarts, money, products, customers } from '../data/mockData'
 import type { Cart, CartItem, Product } from '../types'
 import { BarcodeScanner } from '../components/BarcodeScanner'
-import { Badge, Button, Field, Modal, Toast, type ToastTone } from '../components/Ui'
+import { Badge, Button, Field, Modal, NumericInput, Toast, type ToastTone } from '../components/Ui'
 
 type ModalName = 'new-cart' | 'product' | 'manual' | 'adjust' | 'payment' | 'cancel' | 'scanner' | null
 type PaymentMethod = 'Dinheiro' | 'Pix' | 'Cartão' | 'Fiado'
 type CartIdentification = 'none' | 'customer' | 'nickname'
+
+const paymentOptions: { name: PaymentMethod; icon: typeof Banknote }[] = [
+  { name: 'Dinheiro', icon: Banknote },
+  { name: 'Pix', icon: QrCode },
+  { name: 'Cartão', icon: CreditCard },
+  { name: 'Fiado', icon: UserRound },
+]
 
 const cartTotal = (cart: Cart) => cart.items.reduce((sum, item) => sum + (item.preco * item.quantidade) + item.ajuste, 0)
 
@@ -57,11 +64,13 @@ export function PdvPage() {
   const [adjustType, setAdjustType] = useState<'desconto' | 'acrescimo'>('desconto')
   const [adjustValueInput, setAdjustValueInput] = useState('2,00')
   const [manualName, setManualName] = useState('Saco de gelo')
+  const [manualQuantity, setManualQuantity] = useState(1)
   const [manualPrice, setManualPrice] = useState(5)
   const [method, setMethod] = useState<PaymentMethod>('Dinheiro')
   const [received, setReceived] = useState(100)
   const [splitPayment, setSplitPayment] = useState(false)
-  const [pixValue, setPixValue] = useState(0)
+  const [secondaryMethod, setSecondaryMethod] = useState<PaymentMethod>('Pix')
+  const [secondaryAmountInput, setSecondaryAmountInput] = useState('0,00')
   const [customerId, setCustomerId] = useState<number | ''>('')
   const [cartIdentification, setCartIdentification] = useState<CartIdentification>('none')
   const [newCartCustomerId, setNewCartCustomerId] = useState(customers.find((customer) => customer.ativo)?.id ?? 0)
@@ -80,8 +89,17 @@ export function PdvPage() {
   const adjustValue = parseCurrencyInput(adjustValueInput)
   const adjustmentAmount = selectedItem ? (adjustType === 'desconto' ? -adjustValue : adjustValue) : 0
   const previewItemTotal = selectedItem ? selectedItem.preco * selectedItem.quantidade + adjustmentAmount : 0
-  const moneyPart = splitPayment ? Math.max(0, total - pixValue) : total
-  const change = method === 'Dinheiro' ? Math.max(0, received - moneyPart) : 0
+  const totalCents = Math.round(total * 100)
+  const secondaryAmountCents = Math.min(totalCents, Math.max(0, Math.round(parseCurrencyInput(secondaryAmountInput) * 100)))
+  const primaryAmount = splitPayment ? (totalCents - secondaryAmountCents) / 100 : total
+  const secondaryAmount = splitPayment ? secondaryAmountCents / 100 : 0
+  const paymentIncludesFiado = method === 'Fiado' || (splitPayment && secondaryMethod === 'Fiado')
+  const splitPaymentInvalid = splitPayment && (method === secondaryMethod || primaryAmount <= 0 || secondaryAmount <= 0)
+  const paymentInvalid = splitPaymentInvalid || (paymentIncludesFiado && !customerId)
+  const fiadoAmount = method === 'Fiado' ? primaryAmount : secondaryAmount
+  const entryAmount = method === 'Fiado' ? secondaryAmount : primaryAmount
+  const entryMethod = method === 'Fiado' ? secondaryMethod : method
+  const change = method === 'Dinheiro' && !splitPayment ? Math.max(0, received - total) : 0
   const nextCartId = Math.max(...carts.map((cart) => cart.id), 0) + 1
   const nextCartCode = `#${1047 + nextCartId}`
   const newCartLabel = cartIdentification === 'customer'
@@ -92,9 +110,8 @@ export function PdvPage() {
 
   useEffect(() => {
     const container = cartTabsRef.current
-    const activeTab = container?.querySelector<HTMLElement>('[data-active="true"]')
-    if (!container || !activeTab) return
-    container.scrollLeft = activeTab.offsetLeft - container.offsetLeft - 2
+    if (!container) return
+    container.scrollLeft = 0
   }, [activeId, carts.length])
 
   const updateCartItems = (updater: (items: CartItem[]) => CartItem[]) => {
@@ -140,8 +157,8 @@ export function PdvPage() {
   }
 
   const addManual = () => {
-    if (!manualName.trim() || manualPrice <= 0) return
-    updateCartItems((items) => [...items, { id: crypto.randomUUID(), nome: manualName, apresentacao: 'Item manual', quantidade: 1, fatorBase: 0, preco: manualPrice, ajuste: 0, manual: true }])
+    if (!manualName.trim() || manualQuantity <= 0 || manualPrice <= 0) return
+    updateCartItems((items) => [...items, { id: crypto.randomUUID(), nome: manualName, apresentacao: 'Item manual', quantidade: manualQuantity, fatorBase: 0, preco: manualPrice, ajuste: 0, manual: true }])
     setModal(null)
     setToast({ message: 'Item manual adicionado sem movimentar estoque', tone: 'warning' })
   }
@@ -192,14 +209,43 @@ export function PdvPage() {
     setToast(null)
     setMethod('Dinheiro')
     setSplitPayment(false)
+    setSecondaryMethod('Pix')
+    setSecondaryAmountInput(formatCurrencyInput(total / 2))
+    setReceived(total)
     setCustomerId(activeCart.clienteId ?? '')
     setModal('payment')
   }
 
   const selectPaymentMethod = (name: PaymentMethod) => {
     setMethod(name)
-    setSplitPayment(false)
+    if (splitPayment && secondaryMethod === name) {
+      setSecondaryMethod(paymentOptions.find((option) => option.name !== name)?.name ?? 'Pix')
+    }
     if (name === 'Fiado') setCustomerId(activeCart.clienteId ?? '')
+  }
+
+  const selectSecondaryPaymentMethod = (name: PaymentMethod) => {
+    if (name === method) return
+    setSecondaryMethod(name)
+    if (name === 'Fiado') setCustomerId(activeCart.clienteId ?? '')
+  }
+
+  const toggleSplitPayment = (enabled: boolean) => {
+    setSplitPayment(enabled)
+    if (!enabled) return
+    const fallbackMethod = paymentOptions.find((option) => option.name !== method)?.name ?? 'Pix'
+    if (secondaryMethod === method) setSecondaryMethod(fallbackMethod)
+    setSecondaryAmountInput(formatCurrencyInput(total / 2))
+  }
+
+  const updateSecondaryAmount = (value: string) => {
+    const normalized = value.replace(/[^\d,.]/g, '')
+    if (/^\d*([,.]\d{0,2})?$/.test(normalized)) setSecondaryAmountInput(normalized)
+  }
+
+  const normalizeSecondaryAmount = () => {
+    const cents = Math.min(Math.max(totalCents - 1, 1), Math.max(1, secondaryAmountCents))
+    setSecondaryAmountInput(formatCurrencyInput(cents / 100))
   }
 
   const cancelCart = () => {
@@ -215,8 +261,11 @@ export function PdvPage() {
   }
 
   const finishSale = () => {
-    if (method === 'Fiado' && !customerId) return
+    if (paymentInvalid) return
     const code = activeCart.codigo
+    const paymentDescription = splitPayment
+      ? `${money(primaryAmount)} em ${method} + ${money(secondaryAmount)} em ${secondaryMethod}`
+      : `${money(total)} em ${method}`
     const remaining = carts.filter((cart) => cart.id !== activeId)
     if (remaining.length) {
       setCarts(remaining)
@@ -226,7 +275,7 @@ export function PdvPage() {
       setActiveId(activeCart.id + 1)
     }
     setModal(null)
-    setToast({ message: `Venda ${code} finalizada. Estoque atualizado.`, tone: 'success' })
+    setToast({ message: `Venda ${code} finalizada: ${paymentDescription}`, tone: 'success' })
   }
 
   if (!activeCart) return null
@@ -249,6 +298,19 @@ export function PdvPage() {
     )
   }
 
+  const fiadoFields = (
+    <div className="fiado-payment">
+      <Field label="Cliente" hint={activeCart.clienteId ? 'Cliente preenchido a partir do carrinho.' : 'Selecione quem ficará responsável pelo fiado.'}>
+        <select value={customerId} onChange={(event) => setCustomerId(event.target.value ? Number(event.target.value) : '')}>
+          <option value="" disabled>Selecione um cliente</option>
+          {customers.filter((customer) => customer.ativo).map((customer) => <option value={customer.id} key={customer.id}>{customer.apelido ?? customer.nome} · aberto {money(customer.totalAberto)}</option>)}
+        </select>
+      </Field>
+      <Button icon={<Plus size={16} />}>Cliente rápido</Button>
+      <Field label="Observação da dívida"><input placeholder="Pagamento combinado para o fim do mês" /></Field>
+    </div>
+  )
+
   return (
     <div className="pdv-page">
       <header className="pdv-header">
@@ -261,8 +323,8 @@ export function PdvPage() {
         <aside className="cart-rail">
           <div className="cart-rail__header"><span>Carrinhos abertos</span><Badge tone="info">{carts.length}</Badge></div>
           <div className="cart-tabs" ref={cartTabsRef}>
-            {renderCartTab(activeCart)}
             <button className="cart-tabs__new" onClick={openNewCart} aria-label="Iniciar uma nova venda"><Plus size={22} /><small>Nova venda</small></button>
+            {renderCartTab(activeCart)}
             {carts.filter((cart) => cart.id !== activeCart.id).map(renderCartTab)}
           </div>
           <div className="cart-rail__foot"><span><i /> Estoque reservado somente ao finalizar</span></div>
@@ -299,7 +361,7 @@ export function PdvPage() {
                   <span className={`product-symbol ${item.manual ? 'product-symbol--manual' : ''}`}>{item.manual ? <Edit3 size={17} /> : item.nome.slice(0, 2).toUpperCase()}</span>
                   <span className="cart-item__product"><strong>{item.nome} {item.manual && <Badge tone="warning">Manual</Badge>}</strong><small>{item.apresentacao}{!item.manual && ` · ${item.fatorBase} ${products.find((p) => p.id === item.produtoId)?.unidade} em estoque base`}</small></span>
                   <span className="quantity-control"><button aria-label="Diminuir" onClick={() => updateCartItems((items) => items.map((current) => current.id === item.id ? { ...current, quantidade: Math.max(1, current.quantidade - 1) } : current))}><Minus size={14} /></button><b>{item.quantidade}</b><button aria-label="Aumentar" onClick={() => updateCartItems((items) => items.map((current) => current.id === item.id ? { ...current, quantidade: current.quantidade + 1 } : current))}><Plus size={14} /></button></span>
-                  <span className="cart-item__price"><strong>{money(item.preco)}</strong>{item.ajuste !== 0 && <small className={item.ajuste < 0 ? 'text-success' : 'text-warning'}>{item.ajuste < 0 ? 'desconto' : 'acréscimo'} {money(Math.abs(item.ajuste))}</small>}</span>
+                  <span className="cart-item__price">{item.ajuste !== 0 && <small className={item.ajuste < 0 ? 'text-success' : 'text-warning'}>{item.ajuste < 0 ? 'Desconto -' : 'Acréscimo +'} {money(Math.abs(item.ajuste))}</small>}<strong>{money(item.preco)}</strong></span>
                   <strong className="cart-item__total">{money(item.preco * item.quantidade + item.ajuste)}</strong>
                   <span className="row-actions"><button aria-label="Aplicar desconto ou acréscimo" onClick={() => openAdjustment(item)}><Percent size={16} /></button><button aria-label="Remover item" onClick={() => updateCartItems((items) => items.filter((current) => current.id !== item.id))}><Trash2 size={16} /></button></span>
                 </div>
@@ -372,7 +434,7 @@ export function PdvPage() {
               <select value={presentationId} onChange={(event) => setPresentationId(Number(event.target.value))}>{selectedProduct.presentations.map((item) => <option key={item.id} value={item.id}>{item.nome} · {money(item.preco)}</option>)}</select>
             </Field>
             <Field label="Quantidade">
-              <input type="number" min="1" value={quantity} onChange={(event) => setQuantity(Math.max(1, Number(event.target.value)))} />
+              <NumericInput decimalScale={0} min={1} value={quantity} onValueChange={setQuantity} />
             </Field>
           </div>
           <div className="conversion-ticket"><span><PackagePlus size={19} /></span><div><small>Conversão para estoque</small><strong>{quantity} × {selectedPresentation.nome} = {quantity * selectedPresentation.fatorBase} {selectedProduct.unidade}</strong></div><b>{money(productSubtotal)}</b></div>
@@ -380,9 +442,9 @@ export function PdvPage() {
       )}
 
       {modal === 'manual' && (
-        <Modal title="Adicionar item manual" description="Este item será registrado na venda sem movimentar o estoque." onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Cancelar</Button><Button variant="primary" onClick={addManual}>Adicionar item</Button></>}>
+        <Modal title="Adicionar item manual" description="Este item será registrado na venda sem movimentar o estoque." onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Cancelar</Button><Button variant="primary" disabled={!manualName.trim() || manualQuantity <= 0 || manualPrice <= 0} onClick={addManual}>Adicionar item</Button></>}>
           <div className="manual-warning"><Edit3 size={18} /><span><strong>Item fora do catálogo</strong><small>O histórico indicará este lançamento como manual.</small></span></div>
-          <div className="form-grid"><Field label="Nome do item"><input value={manualName} onChange={(event) => setManualName(event.target.value)} /></Field><Field label="Quantidade"><input type="number" min="1" defaultValue="1" /></Field><Field label="Preço unitário"><input type="number" min="0.01" step="0.01" value={manualPrice} onChange={(event) => setManualPrice(Number(event.target.value))} /></Field><Field label="Observação (opcional)"><input placeholder="Ex.: venda avulsa" /></Field></div>
+          <div className="form-grid"><Field label="Nome do item"><input value={manualName} onChange={(event) => setManualName(event.target.value)} /></Field><Field label="Quantidade"><NumericInput decimalScale={0} min={1} value={manualQuantity} onValueChange={setManualQuantity} /></Field><Field label="Preço unitário"><NumericInput min={0.01} value={manualPrice} onValueChange={setManualPrice} /></Field><Field label="Observação (opcional)"><input placeholder="Ex.: venda avulsa" /></Field></div>
         </Modal>
       )}
 
@@ -395,13 +457,47 @@ export function PdvPage() {
       )}
 
       {modal === 'payment' && (
-        <Modal title="Finalizar venda" description={`${activeCart.codigo} · ${activeCart.items.length} itens`} size="large" onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Voltar</Button><Button variant="primary" icon={<Check size={18} />} disabled={method === 'Fiado' && !customerId} onClick={finishSale}>Confirmar pagamento</Button></>}>
-          <div className="payment-total"><span>Total da venda</span><strong>{money(total)}</strong><small>Falta distribuir: {money(splitPayment ? Math.max(0, total - moneyPart - pixValue) : 0)}</small></div>
-          <div className="payment-methods">
-            {([{ name: 'Dinheiro', icon: Banknote }, { name: 'Pix', icon: QrCode }, { name: 'Cartão', icon: CreditCard }, { name: 'Fiado', icon: UserRound }] as { name: PaymentMethod; icon: typeof Banknote }[]).map(({ name, icon: Icon }) => <button key={name} className={method === name ? 'active' : ''} onClick={() => selectPaymentMethod(name)}><Icon size={21} /><span>{name}</span>{method === name && <Check size={15} />}</button>)}
+        <Modal title="Finalizar venda" description={`${activeCart.codigo} · ${activeCart.items.length} itens`} size="large" onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Voltar</Button><Button variant="primary" icon={<Check size={18} />} disabled={paymentInvalid} onClick={finishSale}>Confirmar pagamento</Button></>}>
+          <div className="payment-total"><span>Total da venda</span><strong>{money(total)}</strong><small>{splitPayment ? `${method} + ${secondaryMethod}` : `Pagamento em ${method}`}</small></div>
+          <div className="payment-methods" role="group" aria-label={splitPayment ? 'Primeiro meio de pagamento' : 'Meio de pagamento'}>
+            {paymentOptions.map(({ name, icon: Icon }) => <button key={name} className={method === name ? 'active' : ''} onClick={() => selectPaymentMethod(name)}><Icon size={21} /><span>{name}</span>{method === name && <Check size={15} />}</button>)}
           </div>
-          <label className="toggle-row"><span><strong>Dividir pagamento</strong><small>Combinar dinheiro e Pix</small></span><input type="checkbox" checked={splitPayment} onChange={(event) => { setSplitPayment(event.target.checked); setMethod('Dinheiro'); setPixValue(event.target.checked ? Math.min(20, total) : 0) }} /></label>
-          {splitPayment ? <div className="split-fields"><Field label="Dinheiro"><input type="number" value={moneyPart} readOnly /></Field><Field label="Pix"><input type="number" value={pixValue} onChange={(event) => setPixValue(Math.min(total, Math.max(0, Number(event.target.value))))} /></Field></div> : method === 'Dinheiro' ? <div className="cash-payment"><Field label="Valor recebido"><input type="number" value={received} onChange={(event) => setReceived(Number(event.target.value))} /></Field><span><small>Troco</small><strong>{money(change)}</strong></span></div> : method === 'Pix' ? <div className="confirmation-panel"><QrCode size={22} /><span><strong>Aguardando confirmação manual</strong><small>Confirme o recebimento antes de concluir.</small></span><Button icon={<Check size={16} />}>Marcar como recebido</Button></div> : method === 'Cartão' ? <div className="confirmation-panel"><CreditCard size={22} /><span><strong>Pagamento na maquininha</strong><small>Registre após a aprovação do cartão.</small></span><Button icon={<Check size={16} />}>Marcar como pago</Button></div> : <div className="fiado-payment"><Field label="Cliente" hint={activeCart.clienteId ? 'Cliente preenchido a partir do carrinho.' : 'Selecione quem ficará responsável pelo fiado.'}><select value={customerId} onChange={(event) => setCustomerId(event.target.value ? Number(event.target.value) : '')}><option value="" disabled>Selecione um cliente</option>{customers.filter((customer) => customer.ativo).map((customer) => <option value={customer.id} key={customer.id}>{customer.apelido ?? customer.nome} · aberto {money(customer.totalAberto)}</option>)}</select></Field><Button icon={<Plus size={16} />}>Cliente rápido</Button><Field label="Observação da dívida"><input placeholder="Pagamento combinado para o fim do mês" /></Field></div>}
+          <label className="toggle-row"><span><strong>Combinar dois meios</strong><small>Dividir o total entre duas formas de pagamento</small></span><input type="checkbox" checked={splitPayment} onChange={(event) => toggleSplitPayment(event.target.checked)} /></label>
+
+          {splitPayment ? (
+            <div className="split-payment">
+              <div className="secondary-method-picker">
+                <div><strong>Segundo meio</strong><small>Escolha uma forma diferente de {method}</small></div>
+                <div className="secondary-payment-methods" role="group" aria-label="Segundo meio de pagamento">
+                  {paymentOptions.filter((option) => option.name !== method).map(({ name, icon: Icon }) => <button key={name} className={secondaryMethod === name ? 'active' : ''} onClick={() => selectSecondaryPaymentMethod(name)}><Icon size={18} /><span>{name}</span>{secondaryMethod === name && <Check size={14} />}</button>)}
+                </div>
+              </div>
+
+              <div className="split-fields">
+                <Field label={`1º meio · ${method}`} hint="Calculado pelo valor restante.">
+                  <div className="money-input money-input--readonly"><span>R$</span><input value={formatCurrencyInput(primaryAmount)} readOnly aria-label={`Valor pago em ${method}`} /></div>
+                </Field>
+                <Field label={`2º meio · ${secondaryMethod}`} hint="Digite quanto será pago neste meio.">
+                  <div className="money-input"><span>R$</span><input type="text" inputMode="decimal" value={secondaryAmountInput} onFocus={(event) => event.currentTarget.select()} onBlur={normalizeSecondaryAmount} onChange={(event) => updateSecondaryAmount(event.currentTarget.value)} aria-label={`Valor pago em ${secondaryMethod}`} /></div>
+                </Field>
+              </div>
+
+              <div className={`payment-distribution ${splitPaymentInvalid ? 'payment-distribution--invalid' : ''}`}>
+                <span><small>{method}</small><strong>{money(primaryAmount)}</strong></span>
+                <Plus size={16} />
+                <span><small>{secondaryMethod}</small><strong>{money(secondaryAmount)}</strong></span>
+                <b>{money(primaryAmount + secondaryAmount)}</b>
+              </div>
+              {splitPaymentInvalid && <div className="payment-split-error">Os dois valores precisam ser maiores que zero.</div>}
+
+              {paymentIncludesFiado && (
+                <>
+                  <div className="fiado-entry-summary"><span><small>Entrada · {entryMethod}</small><strong>{money(entryAmount)}</strong></span><span><small>Valor no fiado</small><strong>{money(fiadoAmount)}</strong></span></div>
+                  {fiadoFields}
+                </>
+              )}
+            </div>
+          ) : method === 'Dinheiro' ? <div className="cash-payment"><Field label="Valor recebido"><NumericInput min={0} value={received} onValueChange={setReceived} /></Field><span><small>Troco</small><strong>{money(change)}</strong></span></div> : method === 'Pix' ? <div className="confirmation-panel"><QrCode size={22} /><span><strong>Aguardando confirmação manual</strong><small>Confirme o recebimento antes de concluir.</small></span><Button icon={<Check size={16} />}>Marcar como recebido</Button></div> : method === 'Cartão' ? <div className="confirmation-panel"><CreditCard size={22} /><span><strong>Pagamento na maquininha</strong><small>Registre após a aprovação do cartão.</small></span><Button icon={<Check size={16} />}>Marcar como pago</Button></div> : fiadoFields}
           <div className="payment-rule"><CircleDollarSign size={17} /><span>A venda finalizada não permite editar itens ou valores. Cancelamentos preservam o histórico.</span></div>
         </Modal>
       )}

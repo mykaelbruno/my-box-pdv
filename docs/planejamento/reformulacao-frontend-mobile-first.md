@@ -72,6 +72,19 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 23. Modal funcional para registro de venda posterior no modulo de vendas.
 24. PDV mobile compacto, priorizando lista de itens e mantendo carrinho ativo,
     nova venda, busca, resumo e finalizacao no mesmo viewport.
+25. Finalizacao com pagamento simples ou combinacao de quaisquer dois meios
+    distintos entre Dinheiro, Pix, Cartao e Fiado.
+26. Modais mobile com rolagem interna isolada e bloqueio do conteudo ao fundo.
+27. Campos numericos editaveis sem conversao destrutiva durante a digitacao.
+28. Resumo do caixa atual na tela inicial, oculto quando nao houver caixa aberto.
+29. Cabecalho da tela inicial em uma unica faixa mobile, com saudacao e estado
+    do caixa lado a lado.
+30. Cadastro de produto reorganizado em pares de campos no mobile, preservando
+    largura total para nome, estoque, custo e codigo de barras.
+31. Quantidades base e conversoes com inteiros para `UN` e ate duas casas
+    decimais para `KG`.
+32. Faixa de carrinhos do PDV iniciando por `Nova venda`, seguida do carrinho
+    ativo e dos demais, com ajustes de preco destacados junto ao valor unitario.
 
 ## Decisoes desta etapa
 
@@ -84,6 +97,10 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 - quando a camera nao estiver disponivel ou a permissao for negada, o operador
   deve conseguir informar o codigo manualmente;
 - as edicoes continuam locais e mockadas ate existir contrato de API e backend.
+- em pagamentos combinados, os dois valores devem ser positivos, usar meios
+  diferentes e somar exatamente o total da venda;
+- quando uma das partes for Fiado, a outra representa a entrada e o cliente e
+  obrigatorio para registrar o saldo restante.
 
 Nao fazem parte desta etapa mudancas de regra de negocio, integracao com backend
 ou implementacao de novos modulos funcionais.
@@ -131,7 +148,19 @@ ou implementacao de novos modulos funcionais.
 - cadastro e edicao permitem alterar apresentacoes e seus codigos de barras;
 - a navegacao inferior permanece acessivel durante a consulta do produto;
 - o fechamento do caixa nao solicita dinheiro contado nem diferenca manual;
+- a finalizacao permite combinar quaisquer dois meios de pagamento distintos;
+- combinacoes com Fiado identificam a entrada, o saldo fiado e exigem cliente;
+- modais permitem percorrer todo o conteudo sem movimentar a pagina de origem;
+- campos de quantidade e valores aceitam apagar, substituir e informar centavos;
+- o resumo da tela inicial usa o mesmo estado do modulo Caixa e abre esse modulo
+  pelo botao de detalhes;
 - a tela financeira possui novamente um item proprio na navegacao lateral;
 - a topbar mobile orienta a tela atual sem ocupar mais de 56 px;
+- a saudacao e o estado do caixa dividem a primeira faixa da tela inicial sem
+  criar uma segunda linha de card;
+- campos de estoque minimo e conversao rejeitam fracionamento em `UN` e aceitam
+  duas casas decimais em `KG`;
+- `Nova venda` permanece visivel antes do carrinho ativo na faixa do PDV;
+- descontos e acrescimos aparecem como etiquetas legiveis junto ao preco do item;
 - a identidade visual atual permanece reconhecivel;
 - build e verificacao de tipos concluem sem erros.

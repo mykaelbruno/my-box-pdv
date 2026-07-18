@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes, PropsWithChildren, ReactNode } from 'react'
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type PropsWithChildren, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle, Check, Info, X } from 'lucide-react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'danger'
@@ -75,7 +76,17 @@ interface ModalProps {
 }
 
 export function Modal({ title, description, onClose, children, footer, size = 'medium' }: ModalProps) {
-  return (
+  useEffect(() => {
+    document.documentElement.classList.add('modal-open')
+    document.body.classList.add('modal-open')
+
+    return () => {
+      document.documentElement.classList.remove('modal-open')
+      document.body.classList.remove('modal-open')
+    }
+  }, [])
+
+  return createPortal(
     <div className="modal-layer" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <dialog className={`modal modal--${size}`} open aria-labelledby="modal-title">
         <div className="modal__header">
@@ -90,7 +101,75 @@ export function Modal({ title, description, onClose, children, footer, size = 'm
         <div className="modal__body">{children}</div>
         {footer && <div className="modal__footer">{footer}</div>}
       </dialog>
-    </div>
+    </div>,
+    document.body,
+  )
+}
+
+interface NumericInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type' | 'min' | 'max' | 'step'> {
+  value: number
+  onValueChange: (value: number) => void
+  min?: number
+  max?: number
+  decimalScale?: number
+}
+
+const formatNumericValue = (value: number, decimalScale: number) => decimalScale === 0
+  ? Math.round(value).toString()
+  : value.toFixed(decimalScale).replace('.', ',')
+
+const parseNumericValue = (value: string) => {
+  const parsed = Number.parseFloat(value.replace(',', '.'))
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+export function NumericInput({ value, onValueChange, min, max, decimalScale = 2, onFocus, onBlur, ...props }: NumericInputProps) {
+  const focused = useRef(false)
+  const [draft, setDraft] = useState(() => formatNumericValue(value, decimalScale))
+
+  useEffect(() => {
+    if (!focused.current) setDraft(formatNumericValue(value, decimalScale))
+  }, [decimalScale, value])
+
+  const updateDraft = (nextValue: string) => {
+    const withDecimalSeparator = nextValue.replace('.', ',')
+    const normalized = decimalScale === 0
+      ? withDecimalSeparator.split(',')[0].replace(/[^\d]/g, '')
+      : withDecimalSeparator.replace(/[^\d,]/g, '')
+    const pattern = decimalScale === 0 ? /^\d*$/ : new RegExp(`^\\d*(,\\d{0,${decimalScale}})?$`)
+    if (!pattern.test(normalized)) return
+
+    setDraft(normalized)
+    const parsed = parseNumericValue(normalized)
+    onValueChange(parsed ?? 0)
+  }
+
+  const commitValue = () => {
+    focused.current = false
+    const parsed = parseNumericValue(draft)
+    const fallback = min ?? 0
+    const bounded = Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, parsed ?? fallback))
+    const rounded = decimalScale === 0 ? Math.round(bounded) : Math.round(bounded * (10 ** decimalScale)) / (10 ** decimalScale)
+    onValueChange(rounded)
+    setDraft(formatNumericValue(rounded, decimalScale))
+  }
+
+  return (
+    <input
+      {...props}
+      type="text"
+      inputMode={decimalScale === 0 ? 'numeric' : 'decimal'}
+      value={draft}
+      onChange={(event) => updateDraft(event.currentTarget.value)}
+      onFocus={(event) => {
+        focused.current = true
+        onFocus?.(event)
+      }}
+      onBlur={(event) => {
+        commitValue()
+        onBlur?.(event)
+      }}
+    />
   )
 }
 
@@ -148,4 +227,3 @@ export function Progress({ value, max = 100, tone = 'success' }: { value: number
     </div>
   )
 }
-

@@ -81,7 +81,7 @@ export const initialCarts: Cart[] = [
     operador: 'Coutinho',
     items: [
       { id: 'i-1', produtoId: 1, nome: 'Feijão Carioca', apresentacao: '1 kg', quantidade: 2, fatorBase: 1, preco: 7, ajuste: 0 },
-      { id: 'i-2', produtoId: 3, nome: 'Óleo de Soja', apresentacao: 'Unidade', quantidade: 1, fatorBase: 1, preco: 8.9, ajuste: 0 },
+      { id: 'i-2', produtoId: 3, nome: 'Óleo de Soja', apresentacao: 'Unidade', quantidade: 1, fatorBase: 1, preco: 8.9, ajuste: -2 },
     ],
   },
   {
@@ -123,6 +123,23 @@ export const recentSales = [
   { id: '#1043', time: '09:14', items: 3, customer: 'Seu José', payment: 'Fiado', total: 38.5, status: 'Cancelada' },
 ]
 
+export const currentCash = {
+  openedAt: '07:42',
+  elapsed: '8h24',
+  operator: 'Coutinho',
+  salesCount: 42,
+  cancellationCount: 1,
+  cancellationTotal: 38.5,
+  receivedTotal: 2847.6,
+  salesTotal: 3095.9,
+  creditSalesCount: 3,
+  payments: {
+    dinheiro: 1284.6,
+    pix: 901.4,
+    cartao: 661.6,
+    fiado: 248.3,
+  },
+} as const
+
 export const money = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-

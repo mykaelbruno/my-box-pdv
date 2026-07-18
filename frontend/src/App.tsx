@@ -15,6 +15,7 @@ export default function App() {
   const [authenticated, setAuthenticated] = useState(false)
   const [role, setRole] = useState<Role>('MERCADO')
   const [activeView, setActiveView] = useState<ViewId>('dashboard')
+  const [cashOpen, setCashOpen] = useState(true)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -35,10 +36,10 @@ export default function App() {
 
   const renderMarketView = () => {
     switch (activeView) {
-      case 'dashboard': return <DashboardPage onNavigate={setActiveView} />
+      case 'dashboard': return <DashboardPage cashOpen={cashOpen} onNavigate={setActiveView} />
       case 'pdv': return <PdvPage />
       case 'vendas': return <SalesPage />
-      case 'caixa': return <CashPage />
+      case 'caixa': return <CashPage open={cashOpen} onOpenChange={setCashOpen} />
       case 'estoque': return <InventoryPage />
       case 'clientes': return <CustomersPage />
       case 'financeiro': return <FinancePage />
@@ -46,7 +47,7 @@ export default function App() {
       case 'relatorios': return <ReportsPage />
       case 'backups': return <BackupsPage />
       case 'conta': return <AccountPage role={role} />
-      default: return <DashboardPage onNavigate={setActiveView} />
+      default: return <DashboardPage cashOpen={cashOpen} onNavigate={setActiveView} />
     }
   }
 
@@ -58,9 +59,8 @@ export default function App() {
   }
 
   return (
-    <AppShell role={role} activeView={activeView} onNavigate={setActiveView} onLogout={() => setAuthenticated(false)} onRoleChange={changeRole}>
+    <AppShell role={role} cashOpen={cashOpen} activeView={activeView} onNavigate={setActiveView} onLogout={() => setAuthenticated(false)} onRoleChange={changeRole}>
       {role === 'APP_ADMIN' ? renderAdminView() : renderMarketView()}
     </AppShell>
   )
 }
-

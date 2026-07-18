@@ -64,6 +64,32 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
   preco unitario e total sem elementos decorativos;
 - resumo da venda reduzido para 150 px e mantido fixo acima da navegacao,
   inclusive em telas de 320 x 720.
+- finalizacao generalizada para combinar quaisquer dois meios distintos entre
+  Dinheiro, Pix, Cartao e Fiado;
+- divisao calculada em centavos, com a primeira parcela preenchendo
+  automaticamente o valor restante e bloqueio de parcelas zeradas;
+- combinacoes com Fiado exibem entrada e saldo da divida separadamente e exigem
+  um cliente antes da confirmacao.
+- modais movidos para um portal no corpo da pagina, com bloqueio do documento e
+  rolagem restrita ao conteudo interno;
+- campos de quantidade e valores substituidos por um controle que aceita apagar,
+  digitar com virgula ou ponto e concluir casas decimais sem travar;
+- quantidade do item manual conectada ao item efetivamente adicionado ao PDV;
+- `Como esta o dia` substituido por `Resumo de caixa`, sem rotulo auxiliar nem
+  comparacoes com o dia anterior;
+- resumo da home alimentado pelo caixa atual, ocultado ao fechar e restaurado ao
+  reabrir o caixa;
+- `Ver detalhes` do resumo direcionado ao modulo Caixa.
+- cabecalho inicial mobile compactado em uma unica faixa, mantendo a saudacao e
+  o estado atual do caixa visiveis lado a lado;
+- cadastro de produto mobile reorganizado conforme o rascunho, com campos
+  relacionados lado a lado e informacoes longas em largura total;
+- estoque minimo e conversao das apresentacoes limitados a inteiros para `UN`,
+  com duas casas decimais liberadas para `KG`;
+- `Nova venda` movida para o inicio da faixa de carrinhos, seguida sempre pelo
+  carrinho ativo;
+- descontos e acrescimos apresentados como etiquetas junto ao preco unitario,
+  incluindo o exemplo mockado de `R$ 2,00` no Oleo de Soja.
 
 ## Arquivos principais
 
@@ -104,6 +130,28 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
   separado de aproximadamente 458 kB.
 - verificacao visual do novo PDV em 390 x 844 e 320 x 720, incluindo faixa de
   carrinhos, lista, resumo, total e navegacao inferior.
+- validacao de Dinheiro + Pix, Cartao + Pix e Dinheiro + Fiado no modal mobile;
+- confirmacao de bloqueio do Fiado sem cliente e liberacao apos selecionar Dona
+  Maria;
+- confirmacao de que as duas parcelas permanecem diferentes de zero e somam o
+  total da venda.
+- modal longo validado em 390 x 844 com 1161 px de conteudo, scroll interno em
+  302 px e pagina de fundo mantida na posicao 0;
+- modal de movimentacao validado em 320 x 720, com area interna rolavel e fundo
+  bloqueado;
+- digitacao de `10,50` em quantidade e `350,50` em valor inicial, preservando os
+  valores durante e depois da perda de foco;
+- item manual validado com quantidade `3` e preco `12.50`, normalizado para
+  `12,50` e adicionado ao carrinho com total de `R$ 37,50`;
+- fechamento do caixa removeu o resumo da home e a reabertura voltou a exibi-lo;
+- botao `Ver detalhes` confirmado navegando para Caixa.
+- tela inicial validada em 390 x 844, sem overflow e com saudacao e caixa na
+  mesma faixa;
+- PDV validado em 390 x 844 e 320 x 720 com `Nova venda`, carrinho ativo e
+  demais carrinhos nessa ordem, total de `R$ 20,90` e desconto visivel;
+- cadastro de produto validado em 320 x 720, incluindo pares de campos, rolagem
+  interna, inteiro em `UN`, decimal em `KG` e arredondamento ao retornar para
+  `UN`.
 
 ## Limitacoes
 

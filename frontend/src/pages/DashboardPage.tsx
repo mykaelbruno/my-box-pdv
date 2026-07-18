@@ -11,9 +11,10 @@ import {
   ShoppingCart,
   WalletCards,
 } from 'lucide-react'
+import { currentCash, money } from '../data/mockData'
 import type { ViewId } from '../types'
 
-export function DashboardPage({ onNavigate }: { onNavigate: (view: ViewId) => void }) {
+export function DashboardPage({ cashOpen, onNavigate }: { cashOpen: boolean; onNavigate: (view: ViewId) => void }) {
   return (
     <div className="page home-page">
       <header className="home-header">
@@ -22,9 +23,9 @@ export function DashboardPage({ onNavigate }: { onNavigate: (view: ViewId) => vo
           <h1>Bom dia, Coutinho</h1>
           <p>Escolha uma tarefa para começar.</p>
         </div>
-        <button className="home-cash-status" onClick={() => onNavigate('caixa')}>
+        <button className={`home-cash-status ${cashOpen ? '' : 'home-cash-status--closed'}`} onClick={() => onNavigate('caixa')}>
           <span className="home-cash-status__dot" />
-          <span><small>CAIXA ABERTO</small><strong>Desde 07:42</strong></span>
+          <span><small>{cashOpen ? 'CAIXA ABERTO' : 'CAIXA FECHADO'}</small><strong>{cashOpen ? `Desde ${currentCash.openedAt}` : 'Abrir caixa'}</strong></span>
           <ArrowRight size={20} />
         </button>
       </header>
@@ -101,18 +102,20 @@ export function DashboardPage({ onNavigate }: { onNavigate: (view: ViewId) => vo
         </div>
       </section>
 
-      <section className="home-section home-section--summary">
-        <header className="home-section__header">
-          <div><span>RESUMO SIMPLES</span><h2>Como está o dia</h2></div>
-          <button onClick={() => onNavigate('relatorios')}>Ver detalhes <ArrowRight size={18} /></button>
-        </header>
-        <div className="day-summary">
-          <div><span><ReceiptText size={20} /> Vendas</span><strong>42</strong><small>12 a mais que ontem</small></div>
-          <div><span><Banknote size={20} /> Recebido</span><strong>R$ 2.847,60</strong><small>Dinheiro, Pix e cartão</small></div>
-          <div><span><WalletCards size={20} /> Fiado</span><strong>R$ 248,30</strong><small>3 vendas hoje</small></div>
-          <div><span><Clock3 size={20} /> Caixa</span><strong>8h24</strong><small>Aberto desde 07:42</small></div>
-        </div>
-      </section>
+      {cashOpen && (
+        <section className="home-section home-section--summary">
+          <header className="home-section__header">
+            <div><h2>Resumo de caixa</h2></div>
+            <button onClick={() => onNavigate('caixa')}>Ver detalhes <ArrowRight size={18} /></button>
+          </header>
+          <div className="day-summary">
+            <div><span><ReceiptText size={20} /> Vendas</span><strong>{currentCash.salesCount}</strong></div>
+            <div><span><Banknote size={20} /> Total recebido</span><strong>{money(currentCash.receivedTotal)}</strong></div>
+            <div><span><WalletCards size={20} /> Fiado</span><strong>{money(currentCash.payments.fiado)}</strong><small>{currentCash.creditSalesCount} vendas hoje</small></div>
+            <div><span><Clock3 size={20} /> Caixa</span><strong>{currentCash.elapsed}</strong><small>Aberto desde {currentCash.openedAt}</small></div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

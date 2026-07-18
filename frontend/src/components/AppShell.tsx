@@ -73,13 +73,14 @@ const viewTitles: Record<ViewId, string> = {
 interface AppShellProps {
   children: ReactNode
   role: Role
+  cashOpen: boolean
   activeView: ViewId
   onNavigate: (view: ViewId) => void
   onLogout: () => void
   onRoleChange: (role: Role) => void
 }
 
-export function AppShell({ children, role, activeView, onNavigate, onLogout, onRoleChange }: AppShellProps) {
+export function AppShell({ children, role, cashOpen, activeView, onNavigate, onLogout, onRoleChange }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [financeOpen, setFinanceOpen] = useState(true)
@@ -167,7 +168,7 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
         </nav>
 
         <div className="sidebar__foot">
-          {role === 'MERCADO' && (
+          {role === 'MERCADO' && cashOpen && (
             <div className="cash-status">
               <span className="cash-status__dot" />
               <div><strong>Caixa aberto</strong><small>desde 07:42</small></div>
@@ -199,7 +200,7 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
             <kbd>Ctrl K</kbd>
           </label>
           <div className="topbar__actions">
-            {role === 'MERCADO' && <Badge tone="success">Caixa aberto</Badge>}
+            {role === 'MERCADO' && <Badge tone={cashOpen ? 'success' : 'warning'}>{cashOpen ? 'Caixa aberto' : 'Caixa fechado'}</Badge>}
             <button className="icon-button notification-button" aria-label="Notificações"><Bell size={19} /><span /></button>
             <div className="profile-menu">
               <button className="profile-trigger" onClick={() => setProfileOpen(!profileOpen)} aria-expanded={profileOpen}>
