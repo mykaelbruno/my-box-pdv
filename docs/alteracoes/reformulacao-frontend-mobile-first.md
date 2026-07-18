@@ -82,6 +82,8 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - `Ver detalhes` do resumo direcionado ao modulo Caixa.
 - cabecalho inicial mobile compactado em uma unica faixa, mantendo a saudacao e
   o estado atual do caixa visiveis lado a lado;
+- `Nova venda` compactada em um card horizontal mobile, com icone e texto na
+  primeira faixa e carrinhos em andamento no rodape;
 - cadastro de produto mobile reorganizado conforme o rascunho, com campos
   relacionados lado a lado e informacoes longas em largura total;
 - estoque minimo e conversao das apresentacoes limitados a inteiros para `UN`,
@@ -147,6 +149,8 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - botao `Ver detalhes` confirmado navegando para Caixa.
 - tela inicial validada em 390 x 844, sem overflow e com saudacao e caixa na
   mesma faixa;
+- card `Nova venda` validado em 320 x 720 com 112 px de altura, composicao
+  horizontal e sem overflow;
 - PDV validado em 390 x 844 e 320 x 720 com `Nova venda`, carrinho ativo e
   demais carrinhos nessa ordem, total de `R$ 20,90` e desconto visivel;
 - cadastro de produto validado em 320 x 720, incluindo pares de campos, rolagem

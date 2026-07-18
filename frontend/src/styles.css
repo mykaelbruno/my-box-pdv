@@ -1077,12 +1077,16 @@ button.responsive-table__row:hover { background: var(--paper); }
   .home-cash-status small { font-size: 9px; }
   .home-cash-status strong { font-size: 13px; line-height: 1.2; }
   .home-cash-status > svg { width: 18px; }
-  .counter-primary { min-height: 240px; padding: 22px; }
-  .counter-primary__icon { width: 64px; height: 64px; }
-  .counter-primary__copy { margin-top: 18px; }
-  .counter-primary__copy strong { font-size: 32px; }
-  .counter-primary__copy > span { font-size: 14px; }
-  .counter-primary__footer { padding-top: 14px; font-size: 13px; }
+  .counter-primary { min-height: 112px; display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; align-items: center; gap: 0 12px; padding: 10px 12px; }
+  .counter-primary__icon { grid-column: 1; grid-row: 1; width: 48px; height: 48px; }
+  .counter-primary__icon svg { width: 28px; height: 28px; }
+  .counter-primary__copy { grid-column: 2; grid-row: 1; min-width: 0; justify-content: center; margin-top: 0; }
+  .counter-primary__copy small { display: none; }
+  .counter-primary__copy strong { margin-top: 0; font-size: 22px; }
+  .counter-primary__copy > span { max-width: none; margin-top: 4px; overflow: hidden; font-size: 11px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+  .counter-primary__footer { grid-column: 1 / -1; grid-row: 2; margin-top: 8px; padding-top: 8px; font-size: 11px; }
+  .counter-primary__footer b { font-size: 13px; }
+  .counter-primary__footer > svg { width: 18px; height: 18px; }
   .counter-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .counter-shortcut { min-height: 154px; padding: 14px; }
   .counter-shortcut > span { width: 50px; height: 50px; }
@@ -1306,8 +1310,8 @@ button.responsive-table__row:hover { background: var(--paper); }
   .page-header h1 { font-size: 25px; }
   .page-header p { font-size: 14px; }
   .home-header h1 { font-size: 25px; }
-  .counter-primary { min-height: 252px; padding: 20px; }
-  .counter-primary__copy strong { font-size: 30px; }
+  .counter-primary { min-height: 112px; padding: 10px 12px; }
+  .counter-primary__copy strong { font-size: 21px; }
   .counter-shortcut { min-height: 158px; padding: 13px; }
   .counter-shortcut strong { font-size: 14px; }
   .counter-shortcut small { font-size: 11px; }

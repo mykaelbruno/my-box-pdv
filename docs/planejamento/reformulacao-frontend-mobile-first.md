@@ -158,6 +158,8 @@ ou implementacao de novos modulos funcionais.
 - a topbar mobile orienta a tela atual sem ocupar mais de 56 px;
 - a saudacao e o estado do caixa dividem a primeira faixa da tela inicial sem
   criar uma segunda linha de card;
+- o atalho `Nova venda` usa composicao horizontal compacta no mobile e preserva
+  titulo, descricao e quantidade de carrinhos em andamento;
 - campos de estoque minimo e conversao rejeitam fracionamento em `UN` e aceitam
   duas casas decimais em `KG`;
 - `Nova venda` permanece visivel antes do carrinho ativo na faixa do PDV;
