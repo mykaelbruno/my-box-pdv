@@ -15,12 +15,20 @@ consultas e analises.
 Os dados e operacoes sao locais e reiniciam ao recarregar a pagina. Nao existe
 backend, autenticacao real, pagamento real ou persistencia nesta etapa.
 
+O leitor de codigo de barras e QR Code usa a camera do dispositivo. O navegador
+deve receber permissao de camera e a aplicacao precisa ser acessada por `HTTPS`
+ou por `localhost`. Quando a camera nao estiver disponivel, o mesmo modal permite
+informar o codigo manualmente.
+
 ### Executar
 
 Requisitos:
 
 - Node.js 20 ou superior;
 - npm.
+
+O frontend usa `@zxing/browser` para decodificar codigos pela camera. A
+dependencia e carregada somente quando o leitor e aberto.
 
 ```bash
 cd frontend

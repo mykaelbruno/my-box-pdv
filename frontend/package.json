@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.5",
+    "@zxing/browser": "^0.2.1",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -23,4 +24,3 @@
     "vite": "^6.0.5"
   }
 }
-

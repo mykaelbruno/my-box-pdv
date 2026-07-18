@@ -21,9 +21,10 @@ import {
 } from 'lucide-react'
 import { initialCarts, money, products, customers } from '../data/mockData'
 import type { Cart, CartItem, Product } from '../types'
+import { BarcodeScanner } from '../components/BarcodeScanner'
 import { Badge, Button, Field, Modal, Toast, type ToastTone } from '../components/Ui'
 
-type ModalName = 'new-cart' | 'product' | 'manual' | 'adjust' | 'payment' | 'cancel' | null
+type ModalName = 'new-cart' | 'product' | 'manual' | 'adjust' | 'payment' | 'cancel' | 'scanner' | null
 type PaymentMethod = 'Dinheiro' | 'Pix' | 'Cartão' | 'Fiado'
 type CartIdentification = 'none' | 'customer' | 'nickname'
 
@@ -100,11 +101,24 @@ export function PdvPage() {
     setCarts((current) => current.map((cart) => cart.id === activeId ? { ...cart, items: updater(cart.items) } : cart))
   }
 
-  const openProduct = (product: Product) => {
+  const openProduct = (product: Product, initialPresentationId = product.presentations[0].id) => {
     setSelectedProduct(product)
-    setPresentationId(product.presentations[0].id)
+    setPresentationId(initialPresentationId)
     setQuantity(1)
     setModal('product')
+  }
+
+  const handleBarcodeDetected = (code: string) => {
+    const product = products.find((item) => item.presentations.some((presentation) => presentation.codigo === code))
+    const presentation = product?.presentations.find((item) => item.codigo === code)
+    if (!product || !presentation) {
+      setQuery(code)
+      setModal(null)
+      setToast({ message: `Código ${code} não encontrado no catálogo`, tone: 'error' })
+      return
+    }
+    openProduct(product, presentation.id)
+    setToast({ message: `${product.nome} localizado pela câmera`, tone: 'success' })
   }
 
   const addProduct = () => {
@@ -217,6 +231,24 @@ export function PdvPage() {
 
   if (!activeCart) return null
 
+  const renderCartTab = (cart: Cart) => {
+    const cartLabel = getCartLabel(cart)
+
+    return (
+      <button key={cart.id} data-active={cart.id === activeId} className={cart.id === activeId ? 'active' : ''} onClick={() => setActiveId(cart.id)}>
+        <div className="cart-tab__head">
+          <span className="cart-tab__identity">
+            <strong>{cartLabel ?? cart.codigo}</strong>
+            {cartLabel && <small>{cart.codigo}</small>}
+          </span>
+          <span className="cart-tab__time">{cart.horario}</span>
+        </div>
+        <small className="cart-tab__items">{cart.items.length ? `${cart.items.length} itens` : 'Carrinho vazio'}</small>
+        <b>{money(cartTotal(cart))}</b>
+      </button>
+    )
+  }
+
   return (
     <div className="pdv-page">
       <header className="pdv-header">
@@ -229,22 +261,9 @@ export function PdvPage() {
         <aside className="cart-rail">
           <div className="cart-rail__header"><span>Carrinhos abertos</span><Badge tone="info">{carts.length}</Badge></div>
           <div className="cart-tabs" ref={cartTabsRef}>
-            {carts.map((cart) => {
-              const cartLabel = getCartLabel(cart)
-              return (
-                <button key={cart.id} data-active={cart.id === activeId} className={cart.id === activeId ? 'active' : ''} onClick={() => setActiveId(cart.id)}>
-                  <div className="cart-tab__head">
-                    <span className="cart-tab__identity">
-                      <strong>{cartLabel ?? cart.codigo}</strong>
-                      {cartLabel && <small>{cart.codigo}</small>}
-                    </span>
-                    <span className="cart-tab__time">{cart.horario}</span>
-                  </div>
-                  <small className="cart-tab__items">{cart.items.length ? `${cart.items.length} itens` : 'Carrinho vazio'}</small>
-                  <b>{money(cartTotal(cart))}</b>
-                </button>
-              )
-            })}
+            {renderCartTab(activeCart)}
+            <button className="cart-tabs__new" onClick={openNewCart} aria-label="Iniciar uma nova venda"><Plus size={22} /><small>Nova venda</small></button>
+            {carts.filter((cart) => cart.id !== activeCart.id).map(renderCartTab)}
           </div>
           <div className="cart-rail__foot"><span><i /> Estoque reservado somente ao finalizar</span></div>
         </aside>
@@ -253,7 +272,7 @@ export function PdvPage() {
           <div className="product-search">
             <Search size={21} />
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produto ou ler código de barras" />
-            <button aria-label="Ler código de barras" onClick={() => setQuery('789100004001')}><Barcode size={22} /></button>
+            <button aria-label="Ler código de barras com a câmera" onClick={() => setModal('scanner')}><Barcode size={22} /></button>
           </div>
 
           {query ? (
@@ -306,6 +325,8 @@ export function PdvPage() {
           </div>
         </aside>
       </div>
+
+      {modal === 'scanner' && <BarcodeScanner title="Ler produto" description="Aponte a câmera para o código de barras ou QR Code do produto." onClose={() => setModal(null)} onDetected={handleBarcodeDetected} />}
 
       {modal === 'new-cart' && (
         <Modal

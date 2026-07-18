@@ -4,13 +4,30 @@ import { money, recentSales } from '../data/mockData'
 import { Badge, Button, Field, Metric, Modal, PageHeader, Section, Toast } from '../components/Ui'
 
 export function SalesPage() {
+  const [salesData, setSalesData] = useState([...recentSales])
   const [selected, setSelected] = useState<(typeof recentSales)[number] | null>(null)
   const [query, setQuery] = useState('')
-  const sales = recentSales.filter((sale) => sale.id.includes(query) || sale.customer.toLowerCase().includes(query.toLowerCase()))
+  const [posteriorOpen, setPosteriorOpen] = useState(false)
+  const [posteriorDate, setPosteriorDate] = useState('2026-07-16')
+  const [posteriorTime, setPosteriorTime] = useState('18:30')
+  const [posteriorCustomer, setPosteriorCustomer] = useState('Balcão')
+  const [posteriorPayment, setPosteriorPayment] = useState('Dinheiro')
+  const [posteriorItems, setPosteriorItems] = useState(1)
+  const [posteriorTotal, setPosteriorTotal] = useState(0)
+  const [toast, setToast] = useState('')
+  const sales = salesData.filter((sale) => sale.id.includes(query) || sale.customer.toLowerCase().includes(query.toLowerCase()))
+
+  const savePosteriorSale = () => {
+    if (posteriorTotal <= 0 || posteriorItems <= 0) return
+    const nextCode = Math.max(...salesData.map((sale) => Number(sale.id.replace('#', ''))), 0) + 1
+    setSalesData((current) => [{ id: `#${nextCode}`, time: posteriorTime, items: posteriorItems, customer: posteriorCustomer.trim() || 'Balcão', payment: posteriorPayment, total: posteriorTotal, status: 'Finalizada' }, ...current])
+    setPosteriorOpen(false)
+    setToast(`Venda posterior #${nextCode} registrada em ${new Date(`${posteriorDate}T12:00:00`).toLocaleDateString('pt-BR')}`)
+  }
 
   return (
     <div className="page">
-      <PageHeader eyebrow="Operação" title="Vendas" description="Consulte vendas finalizadas, abertas e canceladas." actions={<Button icon={<Plus size={18} />}>Venda posterior</Button>} />
+      <PageHeader eyebrow="Operação" title="Vendas" description="Consulte vendas finalizadas, abertas e canceladas." actions={<Button icon={<Plus size={18} />} onClick={() => setPosteriorOpen(true)}>Venda posterior</Button>} />
       <div className="filterbar"><label className="filter-search"><Search size={18} /><input placeholder="Buscar número ou cliente" value={query} onChange={(event) => setQuery(event.target.value)} /></label><button><CalendarDays size={17} /> Hoje</button><button><Filter size={17} /> Filtros</button></div>
       <div className="table-shell">
         <div className="table-title"><div><strong>Movimento de hoje</strong><small>{sales.length} vendas encontradas</small></div><span className="table-total">Total <b>{money(sales.reduce((sum, sale) => sum + (sale.status === 'Finalizada' ? sale.total : 0), 0))}</b></span></div>
@@ -26,6 +43,8 @@ export function SalesPage() {
         <Section title="Itens da venda"><div className="detail-items"><div><span>Feijão Carioca</span><small>2 × 1 kg</small><strong>{money(14)}</strong></div><div><span>Óleo de Soja</span><small>1 × Unidade</small><strong>{money(8.9)}</strong></div><div><span>Outros itens</span><small>{Math.max(0, selected.items - 2)} itens</small><strong>{money(Math.max(0, selected.total - 22.9))}</strong></div></div></Section>
         <Field label="Observação"><textarea placeholder="Adicionar observação à venda" /></Field>
       </Modal>}
+      {posteriorOpen && <Modal title="Registrar venda posterior" description="Inclua uma venda realizada anteriormente e que ainda não consta no movimento." onClose={() => setPosteriorOpen(false)} size="large" footer={<><Button variant="quiet" onClick={() => setPosteriorOpen(false)}>Cancelar</Button><Button variant="primary" disabled={posteriorTotal <= 0 || posteriorItems <= 0} onClick={savePosteriorSale}>Registrar venda</Button></>}><div className="posterior-sale-notice"><Clock3 size={19} /><span><strong>Registro retroativo</strong><small>A venda entrará no histórico com a data e o meio de pagamento informados.</small></span></div><div className="form-grid"><Field label="Data da venda"><input type="date" value={posteriorDate} max="2026-07-17" onChange={(event) => setPosteriorDate(event.target.value)} /></Field><Field label="Horário"><input type="time" value={posteriorTime} onChange={(event) => setPosteriorTime(event.target.value)} /></Field><Field label="Cliente ou referência"><input value={posteriorCustomer} placeholder="Balcão" onChange={(event) => setPosteriorCustomer(event.target.value)} /></Field><Field label="Meio de pagamento"><select value={posteriorPayment} onChange={(event) => setPosteriorPayment(event.target.value)}><option>Dinheiro</option><option>Pix</option><option>Cartão</option><option>Fiado</option></select></Field><Field label="Quantidade de itens"><input type="number" min="1" value={posteriorItems} onChange={(event) => setPosteriorItems(Math.max(1, Number(event.target.value)))} /></Field><Field label="Total da venda"><input type="number" min="0.01" step="0.01" value={posteriorTotal} onChange={(event) => setPosteriorTotal(Math.max(0, Number(event.target.value)))} /></Field></div><Field label="Observação"><textarea placeholder="Motivo do lançamento posterior ou detalhes úteis" /></Field></Modal>}
+      {toast && <Toast message={toast} onClose={() => setToast('')} />}
     </div>
   )
 }
@@ -33,15 +52,19 @@ export function SalesPage() {
 export function CashPage() {
   const [open, setOpen] = useState(true)
   const [modal, setModal] = useState<'open' | 'close' | null>(null)
-  const [counted, setCounted] = useState(1310)
   const [toast, setToast] = useState('')
-  const expectedCash = 1284.6
-  const difference = counted - expectedCash
+  const paymentTotals = [
+    { label: 'Dinheiro', value: 1284.6, detail: '18 vendas', icon: Banknote },
+    { label: 'Pix', value: 901.4, detail: '13 vendas', icon: WalletCards },
+    { label: 'Cartão', value: 661.6, detail: '8 vendas', icon: WalletCards },
+    { label: 'Fiado', value: 248.3, detail: '3 vendas', icon: Clock3 },
+  ]
+  const totalSales = paymentTotals.reduce((sum, payment) => sum + payment.value, 0)
 
   const toggleCash = () => {
     setOpen(!open)
     setModal(null)
-    setToast(open ? 'Caixa fechado e conferência registrada' : 'Caixa aberto com sucesso')
+    setToast(open ? 'Caixa fechado e resumo registrado' : 'Caixa aberto com sucesso')
   }
 
   return (
@@ -56,9 +79,8 @@ export function CashPage() {
       </> : <div className="closed-cash"><span><LockKeyhole size={29} /></span><h2>Caixa fechado</h2><p>Abra um novo caixa para iniciar vendas e acompanhar o movimento.</p><Button variant="primary" icon={<Plus size={17} />} onClick={() => setModal('open')}>Abrir caixa</Button></div>}
 
       {modal === 'open' && <Modal title="Abertura de caixa" description="17 de julho de 2026 · horário registrado automaticamente" onClose={() => setModal(null)} footer={<><Button variant="quiet" onClick={() => setModal(null)}>Cancelar</Button><Button variant="primary" onClick={toggleCash}>Abrir caixa</Button></>}><div className="form-grid"><Field label="Valor inicial"><input type="number" defaultValue="200.00" /></Field><Field label="Operador"><input value="Coutinho" readOnly /></Field></div><Field label="Observação"><textarea placeholder="Opcional" /></Field></Modal>}
-      {modal === 'close' && <Modal title="Fechamento de caixa" description="Confira os valores antes de encerrar." onClose={() => setModal(null)} size="large" footer={<><Button variant="quiet" onClick={() => setModal(null)}>Continuar aberto</Button><Button variant="danger" onClick={toggleCash}>Confirmar fechamento</Button></>}><div className="closing-grid"><div className="closing-expected"><span><small>Dinheiro esperado</small><strong>{money(expectedCash)}</strong></span><span><small>Pix confirmado</small><b>{money(901.4)}</b></span><span><small>Cartão confirmado</small><b>{money(661.6)}</b></span></div><div><Field label="Dinheiro conferido"><input type="number" value={counted} onChange={(event) => setCounted(Number(event.target.value))} /></Field><div className={`difference ${difference === 0 ? 'difference--ok' : 'difference--warning'}`}><small>Diferença encontrada</small><strong>{difference > 0 ? '+' : ''}{money(difference)}</strong></div></div></div><Field label="Observação de fechamento"><textarea placeholder="Explique diferenças encontradas" /></Field></Modal>}
+      {modal === 'close' && <Modal title="Fechamento de caixa" description="Resumo das vendas registradas desde a abertura às 07:42." onClose={() => setModal(null)} size="large" footer={<><Button variant="quiet" onClick={() => setModal(null)}>Continuar aberto</Button><Button variant="danger" onClick={toggleCash}>Confirmar fechamento</Button></>}><div className="cash-close-meta"><span><small>Operador</small><strong>Coutinho</strong></span><span><small>Período</small><strong>07:42 às 16:06</strong></span><span><small>Vendas</small><strong>42</strong></span><span><small>Cancelamentos</small><strong>1 · R$ 38,50</strong></span></div><div className="cash-close-summary">{paymentTotals.map(({ label, value, detail, icon: Icon }) => <div key={label}><span className={`cash-close-summary__icon cash-close-summary__icon--${label.toLowerCase().replace('ã', 'a')}`}><Icon size={19} /></span><span><strong>{label}</strong><small>{detail}</small></span><b>{money(value)}</b></div>)}<div className="cash-close-summary__total"><span><strong>Total em vendas</strong><small>Soma de todos os meios de pagamento</small></span><b>{money(totalSales)}</b></div></div><div className="cash-close-note"><ReceiptText size={18} /><span><strong>Resumo pronto para fechar</strong><small>Valores de fiado entram no total vendido, mesmo sem recebimento no caixa.</small></span></div></Modal>}
       {toast && <Toast message={toast} onClose={() => setToast('')} />}
     </div>
   )
 }
-

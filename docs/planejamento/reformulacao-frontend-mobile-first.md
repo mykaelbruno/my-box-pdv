@@ -59,6 +59,31 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 14. Abertura do PDV sem foco automatico no campo de busca ou teclado virtual.
 15. Estoque com atalhos funcionais em carrossel e produtos em linhas compactas.
 16. Fiado com dois atalhos iniciais e indicadores reunidos em modal de resumo.
+17. Leitor de codigo de barras e QR Code por camera no PDV e no estoque, com
+   fallback para digitacao manual.
+18. Cadastro e edicao de produtos, estoque minimo e apresentacoes comerciais
+   dentro do estado mockado do prototipo.
+19. Drawer de produto limitado entre topbar e navegacao inferior no mobile.
+20. Topbar mobile compacta e persistente em todas as telas autenticadas.
+21. Grupo lateral renomeado para `Gestao`, mantendo um item explicito para o
+   modulo `Financeiro`.
+22. Fechamento de caixa somente informativo, com totais por Dinheiro, Pix,
+   Cartao, Fiado e total geral.
+23. Modal funcional para registro de venda posterior no modulo de vendas.
+24. PDV mobile compacto, priorizando lista de itens e mantendo carrinho ativo,
+    nova venda, busca, resumo e finalizacao no mesmo viewport.
+
+## Decisoes desta etapa
+
+- a referencia a `PDF` foi interpretada como `PDV`, pois o fluxo descrito e o
+  botao de codigo de barras existente pertencem ao ponto de venda;
+- o scanner deve usar uma biblioteca mantida para decodificacao de QR Code,
+  EAN, UPC e Code 128, sem implementar um decodificador proprio;
+- acesso a camera depende de permissao do navegador e de contexto seguro
+  (`HTTPS` ou `localhost`);
+- quando a camera nao estiver disponivel ou a permissao for negada, o operador
+  deve conseguir informar o codigo manualmente;
+- as edicoes continuam locais e mockadas ate existir contrato de API e backend.
 
 Nao fazem parte desta etapa mudancas de regra de negocio, integracao com backend
 ou implementacao de novos modulos funcionais.
@@ -93,6 +118,7 @@ ou implementacao de novos modulos funcionais.
 - o fiado exige um cliente e reutiliza o cadastro vinculado ao carrinho;
 - o login permanece utilizavel a partir de 320 px sem rolagem horizontal;
 - a tela do PDV nao move cabecalho, carrinhos ou resumo ao percorrer itens;
+- a lista de itens ocupa a maior area util do PDV e rola de forma independente;
 - subtotal, ajustes e descontos permanecem visiveis no mobile;
 - `Vender` ocupa o centro da barra inferior e possui destaque de acao primaria;
 - o PDV abre sem selecionar automaticamente o campo de busca;
@@ -100,5 +126,12 @@ ou implementacao de novos modulos funcionais.
   320 px;
 - os atalhos de estoque permitem cadastrar, consultar por codigo e movimentar;
 - o resumo do fiado abre sob demanda e nao ocupa espaco permanente na tela;
+- o leitor abre a camera traseira, encerra o stream ao fechar e preenche o
+  codigo detectado no fluxo de origem;
+- cadastro e edicao permitem alterar apresentacoes e seus codigos de barras;
+- a navegacao inferior permanece acessivel durante a consulta do produto;
+- o fechamento do caixa nao solicita dinheiro contado nem diferenca manual;
+- a tela financeira possui novamente um item proprio na navegacao lateral;
+- a topbar mobile orienta a tela atual sem ocupar mais de 56 px;
 - a identidade visual atual permanece reconhecivel;
 - build e verificacao de tipos concluem sem erros.

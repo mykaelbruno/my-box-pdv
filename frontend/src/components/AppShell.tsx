@@ -5,6 +5,7 @@ import {
   BarChart3,
   Bell,
   Boxes,
+  BriefcaseBusiness,
   Building2,
   ChevronDown,
   CircleDollarSign,
@@ -34,6 +35,7 @@ const marketOperationNav: NavItem[] = [
 ]
 
 const marketFinanceNav: NavItem[] = [
+  { id: 'financeiro', label: 'Financeiro', icon: CircleDollarSign },
   { id: 'caixa', label: 'Caixa', icon: Banknote },
   { id: 'vendas', label: 'Vendas', icon: ReceiptText },
   { id: 'firmas', label: 'Firmas', icon: Building2 },
@@ -52,6 +54,21 @@ const adminNav: NavItem[] = [
 ]
 
 const bottomIds: ViewId[] = ['dashboard', 'estoque', 'pdv', 'clientes']
+
+const viewTitles: Record<ViewId, string> = {
+  dashboard: 'Início',
+  pdv: 'Vender',
+  vendas: 'Vendas',
+  caixa: 'Caixa',
+  estoque: 'Estoque',
+  clientes: 'Caderno de Fiado',
+  financeiro: 'Financeiro',
+  firmas: 'Firmas',
+  relatorios: 'Relatórios',
+  backups: 'Backups',
+  administracao: 'Administração',
+  conta: 'Minha conta',
+}
 
 interface AppShellProps {
   children: ReactNode
@@ -116,8 +133,8 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
                   aria-expanded={financeOpen}
                   aria-controls="finance-navigation"
                 >
-                  <CircleDollarSign size={19} />
-                  <span>Financeiro</span>
+                  <BriefcaseBusiness size={19} />
+                  <span>Gestão</span>
                   <ChevronDown className="nav-group__chevron" size={17} />
                 </button>
                 {financeOpen && (
@@ -169,8 +186,9 @@ export function AppShell({ children, role, activeView, onNavigate, onLogout, onR
       {menuOpen && <button className="sidebar-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" />}
 
       <div className={`workspace ${activeView === 'pdv' ? 'workspace--pdv' : ''}`}>
-        <header className={`topbar ${role === 'MERCADO' && activeView !== 'dashboard' ? 'topbar--mobile-hidden' : ''}`}>
+        <header className="topbar">
           <button className="icon-button menu-trigger" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu size={21} /></button>
+          <strong className="topbar__mobile-title">{viewTitles[activeView]}</strong>
           <div className="topbar__market">
             <span className="market-avatar">MC</span>
             <div><strong>{role === 'APP_ADMIN' ? 'Administração My Box' : 'Mercadinho Coutinho'}</strong><small>{role === 'APP_ADMIN' ? 'Visão global' : 'Fortaleza, CE'}</small></div>
