@@ -29,8 +29,8 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - login mobile reorganizado em coluna unica e validado em 320 e 390 px;
 - topbar mobile compacta, persistente e identificando a tela atual;
 - acao de sair adicionada ao rodape do menu lateral;
-- PDV mobile limitado ao viewport, com scroll vertical somente em produtos e
-  itens;
+- PDV mobile com scroll vertical da pagina inteira, sem rolagem interna na lista
+  de produtos ou itens;
 - resumo mobile ampliado com subtotal, ajustes, total e atualizacao de estoque;
 - preco unitario e ajuste por item restaurados na visualizacao mobile;
 - indicadores analiticos movidos para uma area secundaria da tela inicial.
@@ -62,8 +62,12 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
   `Nova venda` na primeira faixa, busca compacta e lista como area principal;
 - itens da venda simplificados no mobile, mantendo quantidade, ajuste, exclusao,
   preco unitario e total sem elementos decorativos;
-- resumo da venda reduzido para 150 px e mantido fixo acima da navegacao,
-  inclusive em telas de 320 x 720.
+- resumo da venda reduzido para 150 px e posicionado ao final da pagina, liberando
+  espaco de trabalho enquanto os itens sao adicionados;
+- faixa de carrinhos solta no fluxo da pagina e somente a busca mantida fixa
+  dentro do box de itens durante a rolagem mobile;
+- altura minima removida do box de itens, que agora cresce de acordo com a
+  quantidade de produtos e encosta naturalmente no resumo;
 - finalizacao generalizada para combinar quaisquer dois meios distintos entre
   Dinheiro, Pix, Cartao e Fiado;
 - divisao calculada em centavos, com a primeira parcela preenchendo
@@ -156,6 +160,17 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - cadastro de produto validado em 320 x 720, incluindo pares de campos, rolagem
   interna, inteiro em `UN`, decimal em `KG` e arredondamento ao retornar para
   `UN`.
+- nova rolagem do PDV validada em 390 x 844 e 320 x 720, sem scroll interno na
+  lista e sem overflow horizontal;
+- faixa de carrinhos confirmada no fluxo da pagina e busca validada como unico
+  elemento fixo dentro do box de itens;
+- box com dois itens validado sem altura minima, mantendo apenas 8 px ate o
+  resumo da venda;
+- avisos temporarios padronizados com fechamento automatico em quatro segundos
+  e indicador regressivo na borda inferior, preservando o fechamento manual;
+- temporizador do aviso validado no PDV: linha em progresso apos dois segundos
+  e componente removido ao completar quatro segundos;
+- abertura da finalizacao testada depois da rolagem e console validado sem erros.
 
 ## Limitacoes
 

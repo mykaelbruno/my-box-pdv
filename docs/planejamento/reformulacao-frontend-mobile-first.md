@@ -53,7 +53,8 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
 9. Login mobile em coluna unica, sem largura minima ou conteudo promocional
    impedindo o acesso ao formulario.
 10. Topbar mobile restrita a tela inicial, mantendo navegacao e saida no menu.
-11. PDV mobile com viewport fixo e rolagem isolada na lista de produtos ou itens.
+11. PDV mobile com rolagem unica da pagina, faixa de carrinhos no fluxo normal,
+    busca fixa dentro da area de itens e resumo ao final do conteudo.
 12. Resumo mobile com subtotal, ajustes, total e regra de atualizacao do estoque.
 13. `Vender` como acao central e destacada na navegacao inferior mobile.
 14. Abertura do PDV sem foco automatico no campo de busca ou teclado virtual.
@@ -71,7 +72,7 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
    Cartao, Fiado e total geral.
 23. Modal funcional para registro de venda posterior no modulo de vendas.
 24. PDV mobile compacto, priorizando lista de itens e mantendo carrinho ativo,
-    nova venda, busca, resumo e finalizacao no mesmo viewport.
+    nova venda e busca acessiveis durante a rolagem ate a finalizacao.
 25. Finalizacao com pagamento simples ou combinacao de quaisquer dois meios
     distintos entre Dinheiro, Pix, Cartao e Fiado.
 26. Modais mobile com rolagem interna isolada e bloqueio do conteudo ao fundo.
@@ -134,8 +135,13 @@ ou implementacao de novos modulos funcionais.
 - carrinhos identificados exibem o nome em destaque e o codigo como metadado;
 - o fiado exige um cliente e reutiliza o cadastro vinculado ao carrinho;
 - o login permanece utilizavel a partir de 320 px sem rolagem horizontal;
-- a tela do PDV nao move cabecalho, carrinhos ou resumo ao percorrer itens;
-- a lista de itens ocupa a maior area util do PDV e rola de forma independente;
+- a tela do PDV usa uma unica rolagem vertical, sem area interna de scroll para
+  a lista de itens;
+- a faixa de carrinhos acompanha a rolagem e somente a busca permanece fixa,
+  limitada a area dos itens;
+- o box de itens cresce conforme o conteudo, sem altura minima ou vazio antes
+  do resumo;
+- o resumo e a finalizacao aparecem ao final do conteudo da venda;
 - subtotal, ajustes e descontos permanecem visiveis no mobile;
 - `Vender` ocupa o centro da barra inferior e possui destaque de acao primaria;
 - o PDV abre sem selecionar automaticamente o campo de busca;
