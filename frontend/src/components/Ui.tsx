@@ -208,13 +208,25 @@ export function EmptyState({ title, description, action }: { title: string; desc
 
 export type ToastTone = 'success' | 'warning' | 'error'
 
-export function Toast({ message, tone = 'success', onClose }: { message: string; tone?: ToastTone; onClose: () => void }) {
+export function Toast({ message, tone = 'success', onClose, duration = 4000 }: { message: string; tone?: ToastTone; onClose: () => void; duration?: number }) {
   const Icon = tone === 'success' ? Check : AlertTriangle
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => onCloseRef.current(), duration)
+    return () => window.clearTimeout(timer)
+  }, [duration, message, tone])
+
   return (
     <div className={`toast toast--${tone}`} role="status">
       <Icon size={18} />
       <span>{message}</span>
       <button onClick={onClose} aria-label="Fechar aviso"><X size={16} /></button>
+      <span key={`${tone}:${message}`} className="toast__timer" aria-hidden="true" style={{ animationDuration: `${duration}ms` }} />
     </div>
   )
 }
