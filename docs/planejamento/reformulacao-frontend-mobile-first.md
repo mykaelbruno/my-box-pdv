@@ -84,8 +84,18 @@ com maior densidade de informacao, como estoque, relatorios e dashboards.
     largura total para nome, estoque, custo e codigo de barras.
 31. Quantidades base e conversoes com inteiros para `UN` e ate duas casas
     decimais para `KG`.
-32. Faixa de carrinhos do PDV iniciando por `Nova venda`, seguida do carrinho
-    ativo e dos demais, com ajustes de preco destacados junto ao valor unitario.
+32. Faixa de carrinhos do PDV iniciando por `Nova venda`, seguida dos carrinhos
+    do mais recente para o mais antigo, com ajustes de preco junto ao valor.
+33. Atalhos iniciais mobile agrupados sob `Setores` e nomeados pelos modulos de
+    destino: Fiado, Consulta de preco, Estoque, Vendas, Caixa e Financeiro.
+34. Consulta de preco desacoplada da navegacao do Estoque, com busca por nome,
+    categoria ou codigo, leitura pela camera e resumo do produto em modal.
+35. Resumo de caixa mobile reduzido aos indicadores `Vendas` e `Total recebido`,
+    preservando os quatro indicadores na visualizacao desktop.
+36. Pendencias removidas da tela inicial e reunidas em `Avisos e pendencias` no
+    sino de notificacoes, preservando os atalhos para os modulos relacionados.
+37. Ordem dos carrinhos do PDV mantida fixa durante a selecao e organizada do
+    mais recente para o mais antigo; somente o estado visual identifica o ativo.
 
 ## Decisoes desta etapa
 
@@ -166,9 +176,18 @@ ou implementacao de novos modulos funcionais.
   criar uma segunda linha de card;
 - o atalho `Nova venda` usa composicao horizontal compacta no mobile e preserva
   titulo, descricao e quantidade de carrinhos em andamento;
+- os atalhos abaixo de `Setores` usam nomes de modulos, ordem previsivel e
+  descricoes curtas de seu conteudo;
+- `Consulta de preco` abre sobre a tela inicial, retorna a apresentacao
+  correspondente ao codigo e permite nova consulta sem trocar de modulo;
+- o resumo de caixa mobile ocupa uma faixa compacta, com somente os dois dados
+  essenciais e acesso direto aos detalhes do modulo Caixa;
+- avisos operacionais ficam fora da tela inicial e podem ser consultados pelo
+  sino em qualquer tela autenticada;
 - campos de estoque minimo e conversao rejeitam fracionamento em `UN` e aceitam
   duas casas decimais em `KG`;
-- `Nova venda` permanece visivel antes do carrinho ativo na faixa do PDV;
+- `Nova venda` permanece visivel antes dos carrinhos, que seguem do mais recente
+  para o mais antigo mesmo quando outro carrinho e selecionado;
 - descontos e acrescimos aparecem como etiquetas legiveis junto ao preco do item;
 - a identidade visual atual permanece reconhecivel;
 - build e verificacao de tipos concluem sem erros.

@@ -92,10 +92,22 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
   relacionados lado a lado e informacoes longas em largura total;
 - estoque minimo e conversao das apresentacoes limitados a inteiros para `UN`,
   com duas casas decimais liberadas para `KG`;
-- `Nova venda` movida para o inicio da faixa de carrinhos, seguida sempre pelo
-  carrinho ativo;
+- `Nova venda` movida para o inicio da faixa, seguida pelos carrinhos do mais
+  recente para o mais antigo;
 - descontos e acrescimos apresentados como etiquetas junto ao preco unitario,
   incluindo o exemplo mockado de `R$ 2,00` no Oleo de Soja.
+- atalho `Consulta de preco` desacoplado do Estoque e transformado em modal de
+  busca por nome, categoria ou codigo de barras;
+- leitor por camera integrado ao atalho, retornando diretamente a apresentacao
+  reconhecida e seu preco;
+- resumo consultivo adicionado com preco em destaque, estoque, unidade base,
+  codigo e troca entre apresentacoes comerciais.
+- resumo de caixa mobile compactado em uma unica faixa com `Vendas` e
+  `Total recebido`, mantendo os indicadores completos no desktop.
+- `Pendencias de hoje` removida da Home e transferida para o sino da topbar como
+  painel `Avisos e pendencias`, mantendo os tres atalhos funcionais.
+- selecao de carrinhos no PDV alterada para preservar ordem e largura, usando
+  apenas fundo e borda para indicar o ativo; novos carrinhos aparecem primeiro.
 
 ## Arquivos principais
 
@@ -106,6 +118,7 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
 - `frontend/src/pages/SalesCashPages.tsx`;
 - `frontend/src/components/AppShell.tsx`;
 - `frontend/src/components/BarcodeScanner.tsx`;
+- `frontend/src/components/PriceLookupModal.tsx`;
 - `frontend/src/styles.css`;
 - `docs/planejamento/reformulacao-frontend-mobile-first.md`.
 
@@ -168,6 +181,22 @@ operadores de mercado com pouca familiaridade com sistemas de gestao.
   resumo da venda;
 - avisos temporarios padronizados com fechamento automatico em quatro segundos
   e indicador regressivo na borda inferior, preservando o fechamento manual;
+- atalhos da tela inicial mobile renomeados para os setores de destino e
+  separados do card `Nova venda` por um subtitulo com divisor;
+- secao `Setores` e os seis atalhos validados em 320 x 720, sem texto cortado
+  ou overflow horizontal; no desktop, o divisor permanece oculto;
+- consulta por `Arroz` validada em 320 x 720, incluindo resumo e troca para a
+  apresentacao `Fardo 10 kg` por `R$ 59,00`;
+- codigo `789100003012` validado pelo fluxo do leitor, retornando `Oleo de Soja`,
+  `Caixa com 12` e `R$ 102,00`, sem navegar para o Estoque;
+- resumo de caixa validado em 320 x 720 com 128 px de altura, dois indicadores
+  e sem overflow; os quatro indicadores permanecem visiveis no desktop;
+- painel `Avisos e pendencias` validado em 320 x 720 e 1280 x 800, sem overflow;
+  os tres avisos direcionam respectivamente para Estoque, Financeiro e Fiado;
+- selecao do carrinho `#1048` validada em 320 x 720: a ordem permaneceu
+  `Nova venda`, `#1049`, `#1048` e ambos mantiveram largura de 174 px;
+- criacao do carrinho `#1050` validada na primeira posicao da lista, seguida por
+  `#1049` e `#1048`, sem erros no console;
 - temporizador do aviso validado no PDV: linha em progresso apos dois segundos
   e componente removido ao completar quatro segundos;
 - abertura da finalizacao testada depois da rolagem e console validado sem erros.

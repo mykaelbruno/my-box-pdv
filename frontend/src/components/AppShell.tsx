@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react'
 import {
+  AlertTriangle,
   Archive,
+  ArrowRight,
   Banknote,
   BarChart3,
   Bell,
@@ -84,10 +86,12 @@ export function AppShell({ children, role, cashOpen, activeView, onNavigate, onL
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [financeOpen, setFinanceOpen] = useState(true)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   const navigate = (view: ViewId) => {
     onNavigate(view)
     setMenuOpen(false)
+    setNotificationsOpen(false)
   }
 
   return (
@@ -201,9 +205,45 @@ export function AppShell({ children, role, cashOpen, activeView, onNavigate, onL
           </label>
           <div className="topbar__actions">
             {role === 'MERCADO' && <Badge tone={cashOpen ? 'success' : 'warning'}>{cashOpen ? 'Caixa aberto' : 'Caixa fechado'}</Badge>}
-            <button className="icon-button notification-button" aria-label="Notificações"><Bell size={19} /><span /></button>
+            <button
+              className="icon-button notification-button"
+              aria-label="Notificações"
+              aria-expanded={notificationsOpen}
+              aria-controls="notifications-panel"
+              onClick={() => { setNotificationsOpen((open) => !open); setProfileOpen(false) }}
+            >
+              <Bell size={19} /><span />
+            </button>
+            {notificationsOpen && (
+              <>
+                <button className="notification-backdrop" aria-label="Fechar notificações" onClick={() => setNotificationsOpen(false)} />
+                <aside className="notification-popover" id="notifications-panel" aria-label="Avisos e pendências">
+                  <header>
+                    <div><small>ATENÇÃO</small><h2>Avisos e pendências</h2></div>
+                    <strong>3</strong>
+                  </header>
+                  <div className="notification-list">
+                    <button onClick={() => navigate('estoque')}>
+                      <span className="attention-grid__icon attention-grid__icon--danger"><Boxes size={22} /></span>
+                      <span><strong>Café Torrado zerou</strong><small>O estoque mínimo é 12 unidades</small></span>
+                      <ArrowRight size={19} />
+                    </button>
+                    <button onClick={() => navigate('financeiro')}>
+                      <span className="attention-grid__icon attention-grid__icon--warning"><AlertTriangle size={22} /></span>
+                      <span><strong>Conta de energia vencida</strong><small>R$ 486,72, vencida há 2 dias</small></span>
+                      <ArrowRight size={19} />
+                    </button>
+                    <button onClick={() => navigate('clientes')}>
+                      <span className="attention-grid__icon attention-grid__icon--info"><ClipboardList size={22} /></span>
+                      <span><strong>Dona Maria está em aberto</strong><small>R$ 186,40 em 3 compras</small></span>
+                      <ArrowRight size={19} />
+                    </button>
+                  </div>
+                </aside>
+              </>
+            )}
             <div className="profile-menu">
-              <button className="profile-trigger" onClick={() => setProfileOpen(!profileOpen)} aria-expanded={profileOpen}>
+              <button className="profile-trigger" onClick={() => { setProfileOpen(!profileOpen); setNotificationsOpen(false) }} aria-expanded={profileOpen}>
                 <span>CO</span><ChevronDown size={15} />
               </button>
               {profileOpen && (

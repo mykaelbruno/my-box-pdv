@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   Banknote,
   Barcode,
@@ -52,7 +52,6 @@ const getCustomerLabel = (customerId?: number) => {
 const getCartLabel = (cart: Cart) => cart.apelido?.trim() || getCustomerLabel(cart.clienteId)
 
 export function PdvPage() {
-  const cartTabsRef = useRef<HTMLDivElement>(null)
   const [carts, setCarts] = useState<Cart[]>(initialCarts)
   const [activeId, setActiveId] = useState(1)
   const [query, setQuery] = useState('')
@@ -78,6 +77,7 @@ export function PdvPage() {
   const [toast, setToast] = useState<{ message: string; tone: ToastTone } | null>(null)
 
   const activeCart = carts.find((cart) => cart.id === activeId) ?? carts[0]
+  const orderedCarts = [...carts].sort((first, second) => second.id - first.id)
   const total = activeCart ? cartTotal(activeCart) : 0
   const filteredProducts = products.filter((product) => {
     const term = query.toLowerCase().trim()
@@ -107,12 +107,6 @@ export function PdvPage() {
     : cartIdentification === 'nickname'
       ? newCartNickname.trim()
       : undefined
-
-  useEffect(() => {
-    const container = cartTabsRef.current
-    if (!container) return
-    container.scrollLeft = 0
-  }, [activeId, carts.length])
 
   const updateCartItems = (updater: (items: CartItem[]) => CartItem[]) => {
     setCarts((current) => current.map((cart) => cart.id === activeId ? { ...cart, items: updater(cart.items) } : cart))
@@ -284,7 +278,7 @@ export function PdvPage() {
     const cartLabel = getCartLabel(cart)
 
     return (
-      <button key={cart.id} data-active={cart.id === activeId} className={cart.id === activeId ? 'active' : ''} onClick={() => setActiveId(cart.id)}>
+      <button key={cart.id} aria-pressed={cart.id === activeId} data-active={cart.id === activeId} className={cart.id === activeId ? 'active' : ''} onClick={() => setActiveId(cart.id)}>
         <div className="cart-tab__head">
           <span className="cart-tab__identity">
             <strong>{cartLabel ?? cart.codigo}</strong>
@@ -322,10 +316,9 @@ export function PdvPage() {
       <div className="pdv-layout">
         <aside className="cart-rail">
           <div className="cart-rail__header"><span>Carrinhos abertos</span><Badge tone="info">{carts.length}</Badge></div>
-          <div className="cart-tabs" ref={cartTabsRef}>
+          <div className="cart-tabs">
             <button className="cart-tabs__new" onClick={openNewCart} aria-label="Iniciar uma nova venda"><Plus size={22} /><small>Nova venda</small></button>
-            {renderCartTab(activeCart)}
-            {carts.filter((cart) => cart.id !== activeCart.id).map(renderCartTab)}
+            {orderedCarts.map(renderCartTab)}
           </div>
           <div className="cart-rail__foot"><span><i /> Estoque reservado somente ao finalizar</span></div>
         </aside>

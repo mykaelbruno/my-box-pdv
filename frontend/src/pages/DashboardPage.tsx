@@ -1,8 +1,7 @@
+import { useState } from 'react'
 import {
-  AlertTriangle,
   ArrowRight,
   Banknote,
-  Boxes,
   CircleDollarSign,
   Clock3,
   PackagePlus,
@@ -11,10 +10,13 @@ import {
   ShoppingCart,
   WalletCards,
 } from 'lucide-react'
+import { PriceLookupModal } from '../components/PriceLookupModal'
 import { currentCash, money } from '../data/mockData'
 import type { ViewId } from '../types'
 
 export function DashboardPage({ cashOpen, onNavigate }: { cashOpen: boolean; onNavigate: (view: ViewId) => void }) {
+  const [priceLookupOpen, setPriceLookupOpen] = useState(false)
+
   return (
     <div className="page home-page">
       <header className="home-header">
@@ -44,60 +46,38 @@ export function DashboardPage({ cashOpen, onNavigate }: { cashOpen: boolean; onN
           </span>
         </button>
 
+        <div className="home-sectors-heading"><h2>Setores</h2></div>
+
         <div className="counter-shortcuts">
           <button className="counter-shortcut counter-shortcut--info" onClick={() => onNavigate('clientes')}>
             <span><WalletCards size={28} /></span>
-            <strong>Receber fiado</strong>
-            <small>4 clientes em aberto</small>
+            <strong>Fiado</strong>
+            <small>Clientes e recebimentos</small>
+          </button>
+          <button className="counter-shortcut" onClick={() => setPriceLookupOpen(true)}>
+            <span><Search size={28} /></span>
+            <strong>Consulta de preço</strong>
+            <small>Preço e quantidade</small>
           </button>
           <button className="counter-shortcut counter-shortcut--warning" onClick={() => onNavigate('estoque')}>
             <span><PackagePlus size={28} /></span>
-            <strong>Entrada de estoque</strong>
-            <small>Registrar mercadoria</small>
-          </button>
-          <button className="counter-shortcut" onClick={() => onNavigate('estoque')}>
-            <span><Search size={28} /></span>
-            <strong>Consultar produto</strong>
-            <small>Preço e quantidade</small>
-          </button>
-          <button className="counter-shortcut counter-shortcut--danger" onClick={() => onNavigate('financeiro')}>
-            <span><CircleDollarSign size={28} /></span>
-            <strong>Registrar despesa</strong>
-            <small>Saída do caixa</small>
+            <strong>Estoque</strong>
+            <small>Produtos e movimentações</small>
           </button>
           <button className="counter-shortcut" onClick={() => onNavigate('vendas')}>
             <span><ReceiptText size={28} /></span>
-            <strong>Vendas do dia</strong>
-            <small>Consultar e cancelar</small>
+            <strong>Vendas</strong>
+            <small>Histórico e cancelamentos</small>
           </button>
           <button className="counter-shortcut counter-shortcut--success" onClick={() => onNavigate('caixa')}>
             <span><Banknote size={28} /></span>
-            <strong>Movimento do caixa</strong>
+            <strong>Caixa</strong>
             <small>Entradas e sangrias</small>
           </button>
-        </div>
-      </section>
-
-      <section className="home-section">
-        <header className="home-section__header">
-          <div><span>PRECISA DE ATENÇÃO</span><h2>Pendências de hoje</h2></div>
-          <strong>3</strong>
-        </header>
-        <div className="attention-grid">
-          <button onClick={() => onNavigate('estoque')}>
-            <span className="attention-grid__icon attention-grid__icon--danger"><Boxes size={24} /></span>
-            <span><strong>Café Torrado zerou</strong><small>O estoque mínimo é 12 unidades</small></span>
-            <ArrowRight size={21} />
-          </button>
-          <button onClick={() => onNavigate('financeiro')}>
-            <span className="attention-grid__icon attention-grid__icon--warning"><AlertTriangle size={24} /></span>
-            <span><strong>Conta de energia vencida</strong><small>R$ 486,72, vencida há 2 dias</small></span>
-            <ArrowRight size={21} />
-          </button>
-          <button onClick={() => onNavigate('clientes')}>
-            <span className="attention-grid__icon attention-grid__icon--info"><WalletCards size={24} /></span>
-            <span><strong>Dona Maria está em aberto</strong><small>R$ 186,40 em 3 compras</small></span>
-            <ArrowRight size={21} />
+          <button className="counter-shortcut counter-shortcut--danger" onClick={() => onNavigate('financeiro')}>
+            <span><CircleDollarSign size={28} /></span>
+            <strong>Financeiro</strong>
+            <small>Contas e despesas</small>
           </button>
         </div>
       </section>
@@ -116,6 +96,8 @@ export function DashboardPage({ cashOpen, onNavigate }: { cashOpen: boolean; onN
           </div>
         </section>
       )}
+
+      {priceLookupOpen && <PriceLookupModal onClose={() => setPriceLookupOpen(false)} />}
     </div>
   )
 }
